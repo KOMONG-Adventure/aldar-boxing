@@ -250,9 +250,6 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 {editForm.lastName ? `${editForm.lastName} ` : ""}{editForm.name}
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-normal">
-                  {editForm.level}
-                </span>
               </h3>
               <p className="text-xs text-zinc-400">📞 {editForm.phone} • Элссэн: {editForm.joinedDate || "Тодорхойгүй"}</p>
             </div>
@@ -283,51 +280,36 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
           </div>
         </div>
 
-        {/* Табууд: Хувийн бүртгэл | Төлбөрийн түүх | Дижитал үнэмлэх | Тулааны рекорд */}
-        <div className="flex border-b border-zinc-800/80 bg-[#121215] px-6 pt-2 overflow-x-auto no-scrollbar scroll-smooth">
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition whitespace-nowrap ${
-              activeTab === "profile" 
-                ? "border-red-500 text-red-500" 
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            Хувийн бүртгэл
-          </button>
-
-          <button
-            onClick={() => { setActiveTab("payments"); setIsEditing(false); }}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "payments" 
-                ? "border-red-500 text-red-500" 
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            <History size={14} /> Төлбөрийн түүх ({paymentHistory.length})
-          </button>
-
-          <button
-            onClick={() => { setActiveTab("fights"); setIsEditing(false); }}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "fights" 
-                ? "border-red-500 text-red-500" 
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            <Trophy size={14} /> Рекорд ({wins}W-{losses}L)
-          </button>
-
-          <button
-            onClick={() => { setActiveTab("card"); setIsEditing(false); }}
-            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === "card" 
-                ? "border-red-500 text-red-500" 
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            <QrCode size={14} /> QR Үнэмлэх
-          </button>
+        {/* Табууд: Хувийн бүртгэл | Төлбөрийн түүх | Рекорд | QR Үнэмлэх */}
+        <div className="relative bg-[#121215] shrink-0">
+          <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
+            {[
+              { key: "profile", label: "Хувийн бүртгэл", icon: null },
+              { key: "payments", label: `Төлбөр (${paymentHistory.length})`, icon: <History size={13} /> },
+              { key: "fights", label: `${wins}W-${losses}L`, icon: <Trophy size={13} /> },
+              { key: "card", label: "QR Үнэмлэх", icon: <QrCode size={13} /> },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key as typeof activeTab); setIsEditing(false); }}
+                className={`relative flex items-center gap-1.5 px-4 py-3 text-[11px] font-bold whitespace-nowrap transition-all duration-200 ${
+                  activeTab === tab.key
+                    ? "text-white"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+                {activeTab === tab.key && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full bg-gradient-to-r from-red-600 to-rose-500 shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+                )}
+              </button>
+            ))}
+          </div>
+          {/* Right fade gradient */}
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#121215] to-transparent" />
+          {/* Bottom border */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-zinc-800/80" />
         </div>
 
         {/* Дэлгэрэнгүй агуулга */}
