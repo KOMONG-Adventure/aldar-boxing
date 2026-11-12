@@ -6,6 +6,7 @@ import {
   CheckCircle2, HeartHandshake, MapPin
 } from "lucide-react";
 import { Guardian } from "@/lib/db";
+import { isPublicRegistrationComplete } from "@/lib/public-registration";
 
 interface AddMemberModalProps {
   onMemberAdded?: () => void;
@@ -123,10 +124,16 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
     });
   };
 
+  const publicFormComplete = isPublicRegistrationComplete({ ...formData, guardians, avatarUrl });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (photoLoading || loading) return;
     setSubmitError("");
+    if (publicRegistration && !publicFormComplete) {
+      setSubmitError("Бүх талбар, асран хамгаалагчийн мэдээллийг бөглөж, профайл зураг оруулна уу.");
+      return;
+    }
     if (!formData.name.trim() || !formData.phone.trim()) {
       alert("Нэр болон утасны дугаараа заавал оруулна уу!");
       return;
@@ -257,7 +264,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   )}
                   <div className="contents">
                     <p className="min-w-0 text-sm font-semibold text-white">Профайл зураг</p>
-                    <p id="member-photo-help" className="sr-only">JPG, PNG, WebP · 5 МБ хүртэл · Заавал биш</p>
+                    <p id="member-photo-help" className="sr-only">JPG, PNG, WebP · 5 МБ хүртэл · {publicRegistration ? "Заавал оруулна" : "Заавал биш"}</p>
                     <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} disabled={photoLoading || loading} aria-label="Сурагчийн профайл зураг сонгох" aria-describedby="member-photo-help member-photo-status" className="hidden" />
                     <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={handlePhotoChange} disabled={photoLoading || loading} aria-label="Камераар сурагчийн зураг авах" aria-describedby="member-photo-help member-photo-status" className="hidden" />
                     <div className="col-span-2 grid min-w-0 grid-cols-2 gap-2">
@@ -287,7 +294,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Овог</label>
-                    <input
+                    <input required={publicRegistration}
                       type="text"
                       placeholder="Жишээ: Бат"
                       value={formData.lastName}
@@ -327,7 +334,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </div>
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Төрсөн огноо</label>
-                    <input
+                    <input required={publicRegistration}
                       type="date"
                       value={formData.birthDate}
                       onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
@@ -340,7 +347,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Регистрийн дугаар</label>
-                    <input
+                    <input required={publicRegistration}
                       type="text"
                       placeholder="УА12345678"
                       value={formData.registerNumber}
@@ -350,12 +357,12 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </div>
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Хүйс</label>
-                    <select
+                    <select required={publicRegistration}
                       value={formData.gender}
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                       className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
-                      <option value="Сонгох">Сонгох</option>
+                      <option value="Сонгох" disabled={publicRegistration}>Сонгох</option>
                       <option value="Эрэгтэй">Эрэгтэй</option>
                       <option value="Эмэгтэй">Эмэгтэй</option>
                     </select>
@@ -366,7 +373,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Түвшин</label>
-                    <select
+                    <select required={publicRegistration}
                       value={formData.level}
                       onChange={(e) => setFormData({ ...formData, level: e.target.value })}
                       className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
@@ -379,7 +386,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </div>
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Элссэн огноо</label>
-                    <input
+                    <input required={publicRegistration}
                       type="date"
                       value={formData.joinedDate}
                       onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })}
@@ -392,7 +399,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Жин /кг/</label>
-                    <input
+                    <input required={publicRegistration}
                       type="number"
                       placeholder="52"
                       value={formData.weight}
@@ -402,7 +409,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </div>
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Өндөр /см/</label>
-                    <input
+                    <input required={publicRegistration}
                       type="number"
                       placeholder="165"
                       value={formData.height}
@@ -416,7 +423,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Ам бүлийн тоо</label>
-                    <input
+                    <input required={publicRegistration}
                       type="number"
                       placeholder="4"
                       value={formData.familyCount}
@@ -426,12 +433,12 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </div>
                   <div>
                     <label className="text-zinc-300 font-medium mb-1.5 block">Цусны бүлэг</label>
-                    <select
+                    <select required={publicRegistration}
                       value={formData.bloodType}
                       onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
                       className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
-                      <option value="Сонгох">Сонгох</option>
+                      <option value="Сонгох" disabled={publicRegistration}>Сонгох</option>
                       <option value="I (O+)">I (O+)</option>
                       <option value="II (A+)">II (A+)</option>
                       <option value="III (B+)">III (B+)</option>
@@ -451,12 +458,12 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </label>
                   <div>
                     <span className="text-[11px] text-zinc-400 mb-1 block">Дүүрэг</span>
-                    <select
+                    <select required={publicRegistration}
                       value={formData.district}
                       onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                       className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
-                      <option value="Сонгох">Сонгох</option>
+                      <option value="Сонгох" disabled={publicRegistration}>Сонгох</option>
                       <option value="Баянзүрх дүүрэг">Баянзүрх дүүрэг</option>
                       <option value="Сүхбаатар дүүрэг">Сүхбаатар дүүрэг</option>
                       <option value="Чингэлтэй дүүрэг">Чингэлтэй дүүрэг</option>
@@ -470,7 +477,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                   </div>
                   <div>
                     <span className="text-[11px] text-zinc-400 mb-1 block">Хороо, Байр, Тоот</span>
-                    <input
+                    <input required={publicRegistration}
                       type="text"
                       placeholder="Жишээ: 14-р хороо, 55-р байр 12 тоот"
                       value={formData.addressDetail}
@@ -509,7 +516,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     )}
                     <div>
                       <label className="text-zinc-300 font-medium mb-1.5 block">Овог нэр</label>
-                      <input
+                      <input required={publicRegistration}
                         type="text"
                         placeholder="Бат Эрдэнэ"
                         value={g.name}
@@ -520,7 +527,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
 
                     <div>
                       <label className="text-zinc-300 font-medium mb-1.5 block">Утасны дугаар</label>
-                      <input
+                      <input required={publicRegistration}
                         type="tel"
                         placeholder="81000011"
                         value={g.phone}
@@ -531,7 +538,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
 
                     <div>
                       <label className="text-zinc-300 font-medium mb-1.5 block">Мэргэжил</label>
-                      <input
+                      <input required={publicRegistration}
                         type="text"
                         placeholder="Жишээ: Эмч"
                         value={g.profession}
@@ -542,7 +549,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
 
                     <div>
                       <label className="text-zinc-300 font-medium mb-1.5 block">Холбоо хамаарал</label>
-                      <select
+                      <select required={publicRegistration}
                         value={g.relation}
                         onChange={(e) => updateGuardian(idx, "relation", e.target.value)}
                         className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
@@ -598,9 +605,11 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
               {/* ТОМ УЛААН СУРАГЧ БҮРТГЭХ ТОВЧ */}
               <div className="pt-2 sticky bottom-0 bg-[#141416]/95 backdrop-blur-sm pb-1">
                 {submitError && <p role="alert" className="mb-3 text-rose-400">{submitError}</p>}
+                {publicRegistration && !publicFormComplete && <p id="registration-required-help" className="mb-3 text-xs text-zinc-400">Бүх талбар, асран хамгаалагчийн мэдээллийг бөглөж, зураг оруулна уу.</p>}
                 <button
                   type="submit"
-                  disabled={loading || photoLoading}
+                  disabled={loading || photoLoading || (publicRegistration && !publicFormComplete)}
+                  aria-describedby={publicRegistration && !publicFormComplete ? "registration-required-help" : undefined}
                   className="w-full bg-[#d00000] hover:bg-red-700 active:scale-[0.99] text-white font-bold py-3.5 rounded-2xl transition duration-150 shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                 >
                   <ShieldCheck size={20} />

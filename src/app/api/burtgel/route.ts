@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { Guardian, Member } from "@/lib/db";
 import { createPublicRegistration } from "@/lib/student-data";
 import { getSupabaseAdmin, SupabaseConfigurationError } from "@/lib/supabase/server";
+import { isPublicRegistrationComplete } from "@/lib/public-registration";
 
 const editableFields = [
   "lastName", "birthDate", "registerNumber", "gender", "level", "joinedDate",
@@ -21,6 +22,9 @@ export async function POST(request: Request) {
     const body = JSON.parse(raw);
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "Бүртгэлийн мэдээлэл буруу байна." }, { status: 400 });
+    }
+    if (!isPublicRegistrationComplete(body)) {
+      return NextResponse.json({ error: "Бүх талбар, асран хамгаалагчийн мэдээллийг бөглөж, профайл зураг оруулна уу." }, { status: 400 });
     }
     if (typeof body.submissionId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.submissionId)) {
       return NextResponse.json({ error: "Хуудсыг дахин нээгээд бүртгэлээ илгээнэ үү." }, { status: 400 });
