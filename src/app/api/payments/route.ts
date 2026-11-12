@@ -1,101 +1,43 @@
-import { getStudentAppData as getDbData, saveStudentAppData as saveDbData } from '@/lib/student-data';
-import { NextResponse } from 'next/server';
-import { PaymentHistoryItem, FinancialLog } from '@/lib/db';
+﻿import { NextResponse } from "next/server";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { getPayments, toPaymentHistory, type PaymentRow } from "@/lib/payment-data";
+import { PAYMENT_PERIODS, paymentEndDate } from "@/lib/billing";
 
-// Сурагчийн төлбөрийн түүх авах
 export async function GET(request: Request) {
+  const memberId = new URL(request.url).searchParams.get("memberId");
+  if (!memberId) return NextResponse.json({ error: "memberId шаардлагатай" }, { status: 400 });
   try {
-    const { searchParams } = new URL(request.url);
-    const memberId = searchParams.get('memberId');
-
-    if (!memberId) {
-      return NextResponse.json({ error: "memberId шаардлагатай" }, { status: 400 });
-    }
-
-    const data = await getDbData();
-    const member = data.members.find(m => m.id === memberId);
-    if (!member) {
-      return NextResponse.json({ error: "Гишүүн олдсонгүй" }, { status: 404 });
-    }
-
-    return NextResponse.json(member.paymentHistory || []);
-  } catch (err) {
-    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
+    const payments = await getPayments(memberId);
+    return NextResponse.json(payments.map(toPaymentHistory), { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    console.error("Payment history read failed", error);
+    return NextResponse.json({ error: "Төлбөрийн түүх татахад алдаа гарлаа." }, { status: 503 });
   }
 }
 
-// Шинэ төлбөр бүртгэх ба түүхэнд нэмэх
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { memberId, amount, periodMonths, startDate, expireDate, method, note } = body;
-
-    if (!memberId || !expireDate) {
-      return NextResponse.json({ error: "memberId болон expireDate шаардлагатай" }, { status: 400 });
+    const { memberId, paymentId, periodMonths, startDate, method, note, expectedMonthlyFee, amount } = body;
+    if (typeof memberId !== "string" || typeof paymentId !== "string" ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(paymentId) ||
+        !PAYMENT_PERIODS.includes(periodMonths) || typeof startDate !== "string" ||
+        !paymentEndDate(startDate, periodMonths) || typeof method !== "string" || !method.trim() || method.length > 100 ||
+        (note !== undefined && (typeof note !== "string" || note.length > 1000)) ||
+        ![50000, 100000].includes(expectedMonthlyFee) || amount !== expectedMonthlyFee * periodMonths) {
+      return NextResponse.json({ error: "Төлбөрийн дүн, хугацаа, огноог шалгана уу." }, { status: 400 });
     }
-
-    const data = await getDbData();
-    const member = data.members.find(m => m.id === memberId);
-    if (!member) {
-      return NextResponse.json({ error: "Гишүүн олдсонгүй" }, { status: 404 });
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const payAmount = Number(amount) || data.settings?.monthlyFee || 150000;
-    const months = Number(periodMonths) || 1;
-
-    const newPaymentRecord: PaymentHistoryItem = {
-      id: "pay_" + Date.now(),
-      date: startDate || today,
-      amount: payAmount,
-      periodMonths: months,
-      startDate: startDate || today,
-      expireDate: expireDate,
-      method: method || "Дансаар",
-      note: note || "",
-      createdAt: new Date().toISOString()
-    };
-
-    if (!member.paymentHistory) member.paymentHistory = [];
-    member.paymentHistory.unshift(newPaymentRecord);
-
-    // Гишүүний одоогийн статусыг шинэчлэх
-    member.status = "PAID";
-    member.paymentDate = newPaymentRecord.date;
-    member.expireDate = expireDate;
-
-    // Санхүүгийн бүртгэлд орлого болгон автоматаар бүртгэх
-    if (!data.financials) data.financials = [];
-    const finEntry: FinancialLog = {
-      id: "fin_" + Date.now(),
-      type: "INCOME",
-      title: `${member.lastName ? member.lastName + " " : ""}${member.name} - Сургалтын төлбөр (${months} сар)`,
-      amount: payAmount,
-      category: "Гишүүнчлэл",
-      date: newPaymentRecord.date,
-      memberId: member.id
-    };
-    data.financials.unshift(finEntry);
-
-    // Мэдэгдэл үүсгэх
-    if (!data.notifications) data.notifications = [];
-    data.notifications.unshift({
-      id: "notif_" + Date.now(),
-      title: "Төлбөр төлөгдлөө",
-      message: `${member.name} сурагчийн ${payAmount.toLocaleString()}₮ төлбөр амжилттай бүртгэгдлээ.`,
-      time: "Дөнгөж сая",
-      type: "success",
-      read: false
+    const { data, error } = await getSupabaseAdmin().rpc("record_student_payment", {
+      p_id: paymentId, p_student_id: memberId, p_period_months: periodMonths,
+      p_start_date: startDate, p_method: method.trim(), p_note: note || "", p_expected_fee: expectedMonthlyFee,
     });
-
-    await saveDbData(data);
-
-    return NextResponse.json({ 
-      success: true, 
-      payment: newPaymentRecord, 
-      member 
-    }, { status: 201 });
-  } catch (err) {
-    return NextResponse.json({ error: "Төлбөр бүртгэхэд алдаа гарлаа" }, { status: 500 });
+    if (error) {
+      console.error("Payment transaction failed", error.code, error.message);
+      return NextResponse.json({ error: error.code === "P0001" ? error.message : "Төлбөр хадгалахад алдаа гарлаа. Дахин оролдоно уу." }, { status: error.code === "P0001" ? 409 : 503 });
+    }
+    return NextResponse.json({ success: true, payment: toPaymentHistory(data as PaymentRow) }, { status: 201 });
+  } catch (error) {
+    console.error("Payment request failed", error);
+    return NextResponse.json({ error: "Төлбөрийн мэдээллийг шалгаад дахин оролдоно уу." }, { status: 400 });
   }
 }

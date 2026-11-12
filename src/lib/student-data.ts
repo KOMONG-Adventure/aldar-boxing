@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { getDbData, type AppData, type Member } from "./db";
 import { fromStudentRow, toStudentRow, type StudentRow } from "./student-fields";
 import { getSupabaseAdmin, STUDENT_PHOTOS_BUCKET } from "./supabase/server";
+import { getPayments, toPaymentHistory } from "./payment-data";
 
 type Snapshot = { rows: Map<string, StudentRow>; avatars: Map<string, string> };
 const snapshots = new WeakMap<AppData, Snapshot>();
@@ -31,6 +32,15 @@ export async function getStudentAppData(): Promise<AppData> {
     }
   }
   local.members = rows.map(row => fromStudentRow(row, avatars.get(row.avatar_path || "")));
+  const payments = await getPayments();
+  const historyByStudent = new Map<string, NonNullable<Member["paymentHistory"]>>();
+  for (const payment of payments) {
+    if (!payment.student_id) continue;
+    const history = historyByStudent.get(payment.student_id) || [];
+    history.push(toPaymentHistory(payment));
+    historyByStudent.set(payment.student_id, history);
+  }
+  for (const member of local.members) member.paymentHistory = historyByStudent.get(member.id) || [];
   snapshots.set(local, {
     rows: new Map(rows.map(row => [row.id, row])),
     avatars: new Map(local.members.map(member => [member.id, member.avatarUrl || ""])),
@@ -94,7 +104,7 @@ export async function saveStudentAppData(data: AppData, registrationOnly = false
   const ids = new Set(data.members.map(member => member.id));
   for (const [id, row] of snapshot.rows) {
     if (ids.has(id)) continue;
-    const { error } = await client.from("students").delete().eq("id", id);
+    const { error } = await client.rpc("delete_student_registration", { p_student_id: id });
     if (error) throw new Error(`Сурагч устгах боломжгүй: ${error.message}`);
     if (row.avatar_path) {
       const { error: photoError } = await bucket.remove([row.avatar_path]);

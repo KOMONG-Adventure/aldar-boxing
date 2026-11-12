@@ -25,6 +25,8 @@ export interface PaymentHistoryItem {
   method?: string;      // Бэлнээр, Дансаар, Картаар, QPay
   note?: string;        // Тэмдэглэл
   createdAt: string;
+  monthlyFee?: number;
+  siblingName?: string;
 }
 
 export interface Member {
@@ -54,6 +56,8 @@ export interface Member {
   fights?: FightRecord[];
   assignedSessionIds?: string[]; // Сурагчийн харьяалагддаг/бүртгэлтэй ангиудын ID
   notes?: string;
+  siblingId?: string | null;
+  monthlyFee?: number;
 }
 
 export interface SessionItem {
@@ -127,7 +131,7 @@ export function getDbData(): AppData {
   return {
     members: [], sessions: [], attendances: [], notifications: [], financials: [],
     settings: {
-      clubName: "ALDAR BOXING CLUB", coachName: "", monthlyFee: 150000,
+      clubName: "ALDAR BOXING CLUB", coachName: "", monthlyFee: 100000,
       gymOpenTime: "07:00", gymCloseTime: "22:00", smsNotification: false, currency: "₮",
     },
   };

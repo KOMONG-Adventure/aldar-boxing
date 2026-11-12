@@ -28,7 +28,7 @@ export default function Home() {
   const [settings, setSettings] = useState<AppSettings>({
     clubName: "CHAMPION BOXING",
     coachName: "Мастер Болд",
-    monthlyFee: 150000,
+    monthlyFee: 100000,
     gymOpenTime: "07:00",
     gymCloseTime: "22:00",
     smsNotification: true,
@@ -57,6 +57,7 @@ export default function Home() {
       if (membersRes.ok) {
         const memData = await membersRes.json();
         setMembers(memData);
+        setSelectedMember(current => current ? memData.find((item: Member) => item.id === current.id) || null : null);
       } else {
         const errorData = await membersRes.json().catch(() => null);
         setMemberLoadError(errorData?.error || "Сурагчдын бүртгэлтэй холбогдож чадсангүй. Дахин шинэчилнэ үү.");
@@ -503,6 +504,7 @@ export default function Home() {
       {selectedMember && (
         <MemberDetailModal
           member={selectedMember}
+          members={members}
           onClose={() => setSelectedMember(null)}
           onTogglePayment={handleTogglePayment}
           onRefresh={fetchAllData}

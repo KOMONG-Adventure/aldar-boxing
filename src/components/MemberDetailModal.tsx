@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { 
   X, User, Phone, MapPin, HeartHandshake, Dumbbell, 
@@ -10,15 +10,18 @@ import {
   Banknote, ArrowUpRight, History
 } from "lucide-react";
 import { Member, FightRecord, PaymentHistoryItem } from "@/lib/db";
+import SiblingBilling from "./SiblingBilling";
+import { billingToday, paymentEndDate } from "@/lib/billing";
 
 interface MemberDetailModalProps {
   member: Member;
+  members: Member[];
   onClose: () => void;
   onTogglePayment: (member: Member) => void;
   onRefresh: () => void;
 }
 
-export default function MemberDetailModal({ member, onClose, onTogglePayment, onRefresh }: MemberDetailModalProps) {
+export default function MemberDetailModal({ member, members, onClose, onTogglePayment, onRefresh }: MemberDetailModalProps) {
   const [activeTab, setActiveTab] = useState<"profile" | "payments" | "card" | "fights">("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -28,24 +31,17 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
   // Шинэ төлбөр бүртгэх модал/хэсэг
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [paymentSubmitting, setPaymentSubmitting] = useState(false);
-  const [paymentFormData, setPaymentFormData] = useState({
-    amount: 150000,
+  const [billingPending, setBillingPending] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const paymentId = useRef<string | null>(null);
+  const monthlyFee = member.monthlyFee || 100000;
+  const [paymentFormData, setPaymentFormData] = useState(() => ({
     periodMonths: 1,
-    startDate: "",
-    expireDate: "",
+    startDate: billingToday(),
+    expireDate: paymentEndDate(billingToday(), 1),
     method: "Дансаар (Хаан банк)",
     note: "",
-  });
-
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-    setPaymentFormData((prev) => ({
-      ...prev,
-      startDate: prev.startDate || today,
-      expireDate: prev.expireDate || nextMonth,
-    }));
-  }, []);
+  }));
 
   // Засах өгөгдлийн төлөв
   const [editForm, setEditForm] = useState({
@@ -119,45 +115,47 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
 
   // Сар сонгох үед дуусах огноог автоматаар тооцох
   const handlePeriodChange = (months: number) => {
-    const start = paymentFormData.startDate ? new Date(paymentFormData.startDate) : new Date();
-    const end = new Date(start);
-    end.setMonth(end.getMonth() + months);
-    
     setPaymentFormData({
       ...paymentFormData,
       periodMonths: months,
-      amount: 150000 * months,
-      expireDate: end.toISOString().split("T")[0],
+      expireDate: paymentEndDate(paymentFormData.startDate, months),
     });
   };
 
   // Шинэ төлбөр түүхэнд нэмж хадгалах
   const handleCreatePaymentRecord = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (paymentSubmitting || billingPending) return;
+    setPaymentError("");
     try {
       setPaymentSubmitting(true);
+      if (!paymentId.current) paymentId.current = crypto.randomUUID();
       const res = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           memberId: member.id,
-          ...paymentFormData
+          ...paymentFormData,
+          paymentId: paymentId.current,
+          expectedMonthlyFee: monthlyFee,
+          amount: monthlyFee * paymentFormData.periodMonths,
         }),
       });
 
-      if (!res.ok) throw new Error("Алдаа гарлаа");
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Төлбөр бүртгэхэд алдаа гарлаа.");
+
+      paymentId.current = null;
       setShowAddPayment(false);
       setEditForm((prev) => ({
         ...prev,
         status: "PAID",
-        paymentDate: paymentFormData.startDate,
-        expireDate: paymentFormData.expireDate,
+        paymentDate: data.payment.startDate,
+        expireDate: data.payment.expireDate,
       }));
       onRefresh();
     } catch (err) {
-      alert("Төлбөр бүртгэхэд алдаа гарлаа");
+      setPaymentError(err instanceof Error ? err.message : "Төлбөр бүртгэхэд алдаа гарлаа.");
     } finally {
       setPaymentSubmitting(false);
     }
@@ -338,12 +336,20 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
                 </div>
 
                 <button
-                  onClick={() => setShowAddPayment(!showAddPayment)}
+                  onClick={() => {
+                    if (!showAddPayment) {
+                      paymentId.current = null;
+                      setPaymentError("");
+                    }
+                    setShowAddPayment(!showAddPayment);
+                  }}
                   className="px-3 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/30 transition"
                 >
                   <Plus size={15} /> Төлбөр авах
                 </button>
               </div>
+
+              <SiblingBilling member={member} members={members} onRefresh={onRefresh} onPendingChange={setBillingPending} disabled={paymentSubmitting} />
 
               {/* ШИНЭ ТӨЛБӨР БҮРТГЭХ ФОРМ */}
               {showAddPayment && (
@@ -389,8 +395,8 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
                       <input
                         type="number"
                         required
-                        value={paymentFormData.amount}
-                        onChange={(e) => setPaymentFormData({ ...paymentFormData, amount: Number(e.target.value) })}
+                        value={monthlyFee * paymentFormData.periodMonths}
+                        readOnly
                         className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-bold"
                       />
                     </div>
@@ -419,13 +425,10 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
                         required
                         value={paymentFormData.startDate}
                         onChange={(e) => {
-                          const start = new Date(e.target.value);
-                          const end = new Date(start);
-                          end.setMonth(end.getMonth() + paymentFormData.periodMonths);
                           setPaymentFormData({
                             ...paymentFormData,
                             startDate: e.target.value,
-                            expireDate: end.toISOString().split("T")[0],
+                            expireDate: paymentEndDate(e.target.value, paymentFormData.periodMonths),
                           });
                         }}
                         className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
@@ -437,7 +440,7 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
                         type="date"
                         required
                         value={paymentFormData.expireDate}
-                        onChange={(e) => setPaymentFormData({ ...paymentFormData, expireDate: e.target.value })}
+                        readOnly
                         className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-semibold"
                       />
                     </div>
@@ -455,9 +458,10 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
                     />
                   </div>
 
+                  {paymentError && <p role="alert" className="text-xs text-red-400">{paymentError}</p>}
                   <button
                     type="submit"
-                    disabled={paymentSubmitting}
+                    disabled={paymentSubmitting || billingPending || !paymentFormData.expireDate}
                     className="w-full py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition text-xs flex items-center justify-center gap-1.5"
                   >
                     <Banknote size={15} />
@@ -474,7 +478,7 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
 
                 {paymentHistory.length === 0 ? (
                   <div className="text-center py-8 bg-[#19191d] rounded-2xl border border-zinc-800 text-zinc-500 text-xs">
-                    Одоогоор төлбөрийн түүх бүртгэгдээгүй байна. Дээрх "Төлбөр авах" товчоор нэмнэ үү.
+                    Одоогоор төлбөрийн түүх бүртгэгдээгүй байна. Дээрх «Төлбөр авах» товчоор нэмнэ үү.
                   </div>
                 ) : (
                   paymentHistory.map((p, idx) => {
@@ -515,9 +519,10 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
 
                             {p.note && (
                               <p className="text-[10px] text-zinc-500 mt-0.5 italic">
-                                "{p.note}"
+                                «{p.note}»
                               </p>
                             )}
+                            {p.siblingName && <p className="mt-1 text-[11px] text-emerald-400">Айлийн 2 хүүхэд · {p.siblingName} · сарын {p.monthlyFee?.toLocaleString()}₮</p>}
                           </div>
                         </div>
 
@@ -590,7 +595,7 @@ export default function MemberDetailModal({ member, onClose, onTogglePayment, on
                       <label className="text-[11px] text-zinc-300 block mb-1">Үр дүн</label>
                       <select
                         value={fightForm.result}
-                        onChange={(e) => setFightForm({ ...fightForm, result: e.target.value as any })}
+                        onChange={(e) => setFightForm({ ...fightForm, result: e.target.value as FightRecord["result"] })}
                         className="w-full bg-[#121215] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500"
                       >
                         <option value="WIN">🏆 Ялалт (WIN)</option>

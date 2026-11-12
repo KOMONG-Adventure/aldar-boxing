@@ -31,5 +31,7 @@ export function fromStudentRow(row: StudentRow, avatarUrl = ""): Member {
   return {
     attendancesCount: 0, paymentHistory: [], fights: [], assignedSessionIds: [],
     ...profile, id: row.id, avatarUrl, createdAt: row.created_at,
+    siblingId: typeof row.sibling_student_id === "string" ? row.sibling_student_id : null,
+    monthlyFee: row.sibling_student_id ? 50000 : 100000,
   };
 }
