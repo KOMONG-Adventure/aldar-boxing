@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import AddMemberModal from "@/components/AddMemberModal";
+import RegistrationLink from "@/components/RegistrationLink";
 import NotificationsModal from "@/components/NotificationsModal";
 import SettingsModal from "@/components/SettingsModal";
 import MemberDetailModal from "@/components/MemberDetailModal";
@@ -273,6 +274,7 @@ export default function Home() {
         {/* --- ТАБ 2: ГИШҮҮДИЙН ЖАГСААЛТ --- */}
         {activeTab === "members" && (
           <div className="space-y-3">
+            <RegistrationLink />
             {/* Хайлт ба Экспорт */}
             <div className="flex gap-2 items-center">
               <div className="relative flex-1">

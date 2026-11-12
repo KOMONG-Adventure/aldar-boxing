@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { getDbData, type AppData } from "./db";
+import { getDbData, type AppData, type Member } from "./db";
 import { fromStudentRow, toStudentRow, type StudentRow } from "./student-fields";
 import { getSupabaseAdmin, STUDENT_PHOTOS_BUCKET } from "./supabase/server";
 
@@ -105,4 +105,11 @@ export async function saveStudentAppData(data: AppData, registrationOnly = false
 
 export function saveMemberRegistration(data: AppData) {
   return saveStudentAppData(data, true);
+}
+
+export async function createPublicRegistration(member: Member) {
+  const data = getDbData();
+  data.members = [member];
+  snapshots.set(data, { rows: new Map(), avatars: new Map() });
+  await saveMemberRegistration(data);
 }

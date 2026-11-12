@@ -8,11 +8,14 @@ import {
 import { Guardian } from "@/lib/db";
 
 interface AddMemberModalProps {
-  onMemberAdded: () => void;
+  onMemberAdded?: () => void;
+  publicRegistration?: boolean;
 }
 
-export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function AddMemberModal({ onMemberAdded, publicRegistration = false }: AddMemberModalProps) {
+  const [isOpen, setIsOpen] = useState(publicRegistration);
+  const [submitted, setSubmitted] = useState(false);
+  const submissionId = useRef<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [photoError, setPhotoError] = useState("");
@@ -139,10 +142,11 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
         avatarUrl,
       };
 
-      const res = await fetch("/api/members", {
+      if (publicRegistration && !submissionId.current) submissionId.current = crypto.randomUUID();
+      const res = await fetch(publicRegistration ? "/api/burtgel" : "/api/members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(publicRegistration ? { ...payload, submissionId: submissionId.current } : payload),
       });
 
       if (!res.ok) {
@@ -150,7 +154,10 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
         throw new Error(result?.error || "Бүртгэл хадгалахад алдаа гарлаа. Дахин оролдоно уу.");
       }
 
-      setIsOpen(false);
+      if (publicRegistration) {
+        setSubmitted(true);
+        submissionId.current = null;
+      } else setIsOpen(false);
       setAvatarUrl("");
       setPhotoError("");
       // Маягтыг цэвэрлэх
@@ -174,7 +181,7 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
         expireDate: "",
       });
       setGuardians([{ name: "", phone: "", profession: "", relation: "Аав" }]);
-      onMemberAdded();
+      onMemberAdded?.();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Бүртгэл хадгалахад алдаа гарлаа");
     } finally {
@@ -182,10 +189,21 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
     }
   };
 
+  if (publicRegistration && submitted) {
+    return (
+      <div className="mx-auto w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#141416] p-8 text-center text-white">
+        <CheckCircle2 size={40} className="mx-auto mb-4 text-emerald-400" />
+        <h1 className="text-xl font-bold">Бүртгэл амжилттай илгээгдлээ</h1>
+        <p className="mt-2 text-sm text-zinc-400">Таны мэдээллийг ALDAR Boxing клуб хүлээн авлаа.</p>
+        <button type="button" onClick={() => setSubmitted(false)} className="mt-6 min-h-11 rounded-xl bg-rose-600 px-5 py-3 text-sm font-semibold hover:bg-rose-700">Өөр сурагч бүртгэх</button>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* --- Зураг дээрх улаан "+" товчлуур --- */}
-      <div 
+      {!publicRegistration && <div
         onClick={openRegistration}
         className="flex flex-col items-center gap-1.5 cursor-pointer group select-none"
       >
@@ -199,12 +217,12 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
         <span className="text-zinc-200 text-xs font-medium tracking-tight group-hover:text-rose-400 transition-colors">
           Шинэ гишүүн
         </span>
-      </div>
+      </div>}
 
       {/* --- Бүртгэлийн том Попап (Modal Dialog) --- */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-lg text-white shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
+        <div className={publicRegistration ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"}>
+          <div className={`bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-lg mx-auto text-white shadow-2xl relative flex flex-col overflow-hidden ${publicRegistration ? "" : "max-h-[92vh]"}`}>
             
             {/* Толгой хэсэг */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-zinc-800/80 shrink-0 bg-[#161619]">
@@ -217,13 +235,13 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
                   <p className="text-xs text-zinc-400">Сурагчийн хувийн мэдээлэл бүртгэх</p>
                 </div>
               </div>
-              <button
+              {!publicRegistration && <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="text-zinc-400 hover:text-white p-2 rounded-xl hover:bg-zinc-800 transition"
               >
                 <X size={20} />
-              </button>
+              </button>}
             </div>
 
             {/* Гүйлгэх үндсэн хэсэг (Scrollable Form) */}
@@ -549,7 +567,7 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
               </div>
 
               {/* 3. ТӨЛБӨРИЙН СУУРЬ */}
-              <div className="bg-[#18181c] p-4 rounded-2xl border border-zinc-800 space-y-3">
+              {!publicRegistration && <div className="bg-[#18181c] p-4 rounded-2xl border border-zinc-800 space-y-3">
                 <label className="text-zinc-300 font-medium block">Төлбөрийн анхны төлөв</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -575,7 +593,7 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
                     ✕ Төлөөгүй
                   </button>
                 </div>
-              </div>
+              </div>}
 
               {/* ТОМ УЛААН СУРАГЧ БҮРТГЭХ ТОВЧ */}
               <div className="pt-2 sticky bottom-0 bg-[#141416]/95 backdrop-blur-sm pb-1">
@@ -586,7 +604,7 @@ export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
                   className="w-full bg-[#d00000] hover:bg-red-700 active:scale-[0.99] text-white font-bold py-3.5 rounded-2xl transition duration-150 shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                 >
                   <ShieldCheck size={20} />
-                  {loading ? "Бүртгэж байна..." : "💾 Сурагч бүртгэх"}
+                  {loading ? "Бүртгэж байна..." : publicRegistration ? "Бүртгэл илгээх" : "💾 Сурагч бүртгэх"}
                 </button>
               </div>
             </form>
