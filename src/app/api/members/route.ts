@@ -1,9 +1,16 @@
+import { getStudentAppData as getDbData, saveMemberRegistration as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
-import { getDbData, saveDbData, Member } from '@/lib/db';
+import { randomUUID } from 'node:crypto';
+import { Member } from '@/lib/db';
 
 export async function GET() {
-  const data = getDbData();
-  return NextResponse.json(data.members);
+  try {
+    const data = await getDbData();
+    return NextResponse.json(data.members, { headers: { 'Cache-Control': 'no-store' } });
+  } catch (error) {
+    console.error('Student registration read failed', error);
+    return NextResponse.json({ error: 'Сурагчдын бүртгэл татахад алдаа гарлаа. Дахин оролдоно уу.' }, { status: 503 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -17,20 +24,23 @@ export async function POST(request: Request) {
       assignedSessionIds, avatarUrl 
     } = body;
 
-    if (!name || !phone) {
+    if (typeof name !== 'string' || !name.trim() || name.trim().length > 120 ||
+        typeof phone !== 'string' || !phone.trim() || phone.trim().length > 30 ||
+        (guardians !== undefined && !Array.isArray(guardians)) ||
+        (avatarUrl !== undefined && typeof avatarUrl !== 'string')) {
       return NextResponse.json({ error: "Нэр, утасны дугаар заавал шаардлагатай" }, { status: 400 });
     }
 
     // Default cartoon avatar генератор
     const defaultCartoonAvatar = avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 
-    const data = getDbData();
-    const newMemberId = "m_" + Date.now();
+    const data = await getDbData();
+    const newMemberId = "m_" + randomUUID();
     const newMember: Member = {
       id: newMemberId,
       lastName: lastName || "",
-      name,
-      phone,
+      name: name.trim(),
+      phone: phone.trim(),
       birthDate: birthDate || "",
       registerNumber: registerNumber || "",
       gender: gender || "Эрэгтэй",
@@ -76,10 +86,11 @@ export async function POST(request: Request) {
       read: false
     });
 
-    saveDbData(data);
+    await saveDbData(data);
 
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {
+    console.error('Student registration create failed', error);
     return NextResponse.json({ error: "Серверийн алдаа гарлаа" }, { status: 500 });
   }
 }
@@ -92,7 +103,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Гишүүний ID шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     data.members = data.members.filter(m => m.id !== id);
     // Хичээлүүдийн бүртгэлээс хасах
     data.sessions.forEach(s => {
@@ -101,7 +112,7 @@ export async function DELETE(request: Request) {
       }
     });
 
-    saveDbData(data);
+    await saveDbData(data);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Устгахад алдаа гарлаа" }, { status: 500 });
@@ -116,7 +127,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Гишүүний ID шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     const target = data.members.find(m => m.id === id);
     if (!target) {
       return NextResponse.json({ error: "Гишүүн олдсонгүй" }, { status: 404 });
@@ -140,7 +151,7 @@ export async function PATCH(request: Request) {
       });
     }
 
-    saveDbData(data);
+    await saveDbData(data);
     return NextResponse.json(target);
   } catch (error) {
     return NextResponse.json({ error: "Шинэчлэхэд алдаа гарлаа" }, { status: 500 });

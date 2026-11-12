@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 export interface Guardian {
   name: string;
   phone: string;
@@ -124,181 +121,18 @@ export interface AppData {
   financials: FinancialLog[];
 }
 
-const dataFilePath = path.join(process.cwd(), 'data.json');
-
-const initialData: AppData = {
-  settings: {
-    clubName: "ALDAR BOXING CLUB",
-    coachName: "Мастер Болд",
-    monthlyFee: 150000,
-    gymOpenTime: "07:00",
-    gymCloseTime: "22:00",
-    smsNotification: true,
-    currency: "₮"
-  },
-  notifications: [
-    {
-      id: "notif_1",
-      title: "Төлбөрийн хугацаа",
-      message: "Энхжин Сүхбат гишүүний төлбөрийн эрх дууссан байна.",
-      time: "Өнөөдөр 08:30",
-      type: "alert",
-      read: false
-    }
-  ],
-  members: [
-    {
-      id: "m_1",
-      lastName: "Бат",
-      name: "Тэмүүлэн",
-      phone: "80000011",
-      birthDate: "2006-05-12",
-      registerNumber: "УА06251211",
-      gender: "Эрэгтэй",
-      level: "Fighter",
-      joinedDate: "2026-10-01",
-      weight: "52",
-      height: "165",
-      familyCount: "4",
-      bloodType: "I (O+)",
-      district: "Баянзүрх дүүрэг",
-      addressDetail: "14-р хороо, 55-р байр",
-      guardians: [
-        {
-          name: "Бат Эрдэнэ",
-          phone: "81000011",
-          profession: "Эмч",
-          relation: "Аав"
-        }
-      ],
-      status: "PAID",
-      paymentDate: "2026-10-01",
-      expireDate: "2026-11-01",
-      createdAt: "2026-10-01",
-      attendancesCount: 18,
-      assignedSessionIds: ["s_1", "s_3"]
-    },
-    {
-      id: "m_2",
-      lastName: "Болд",
-      name: "Төгөлдөр",
-      phone: "99887766",
-      birthDate: "2004-09-15",
-      registerNumber: "УБ04291512",
-      gender: "Эрэгтэй",
-      level: "Advanced",
-      joinedDate: "2026-08-10",
-      weight: "67",
-      height: "178",
-      familyCount: "3",
-      bloodType: "II (A+)",
-      district: "Сүхбаатар дүүрэг",
-      guardians: [],
-      status: "PAID",
-      paymentDate: "2026-10-15",
-      expireDate: "2026-11-15",
-      createdAt: "2026-08-10",
-      attendancesCount: 22,
-      assignedSessionIds: ["s_2", "s_3"]
-    },
-    {
-      id: "m_3",
-      lastName: "Энх",
-      name: "Сүхбат",
-      phone: "91004455",
-      birthDate: "2007-02-20",
-      registerNumber: "УА07222019",
-      gender: "Эрэгтэй",
-      level: "Beginner",
-      joinedDate: "2026-09-18",
-      weight: "60",
-      height: "172",
-      familyCount: "5",
-      bloodType: "III (B+)",
-      district: "Хан-Уул дүүрэг",
-      guardians: [],
-      status: "UNPAID",
-      paymentDate: "2026-09-18",
-      expireDate: "2026-10-18",
-      createdAt: "2026-09-18",
-      attendancesCount: 5,
-      assignedSessionIds: ["s_1"]
-    }
-  ],
-  sessions: [
-    {
-      id: "s_1",
-      title: "Өглөөний фитнес & бокс суурь",
-      time: "07:30 - 09:00",
-      coach: "Дасгалжуулагч Болд",
-      capacity: 15,
-      dayOfWeek: "Даваа - Бямба",
-      enrolledMemberIds: ["m_1", "m_3"]
-    },
-    {
-      id: "s_2",
-      title: "Өдрийн үндсэн техникийн анги",
-      time: "15:00 - 16:30",
-      coach: "Дасгалжуулагч Ганзориг",
-      capacity: 20,
-      dayOfWeek: "Даваа - Баасан",
-      enrolledMemberIds: ["m_2"]
-    },
-    {
-      id: "s_3",
-      title: "Оройн тамирчдын спарринг анги",
-      time: "19:00 - 20:30",
-      coach: "Мастер Даваа",
-      capacity: 12,
-      dayOfWeek: "Даваа, Лхагва, Баасан",
-      enrolledMemberIds: ["m_1", "m_2"]
-    }
-  ],
-  attendances: [
-    {
-      id: "att_1",
-      sessionId: "s_1",
-      sessionTitle: "Өглөөний фитнес & бокс суурь",
-      memberId: "m_1",
-      memberName: "Тэмүүлэн (Бат)",
-      date: new Date().toISOString().split('T')[0],
-      checkInTime: "07:35"
-    }
-  ],
-  financials: []
-};
-
+// Phase one: registrations live in Supabase. Other modules are design previews.
+// No local filesystem persistence or sample student records are used.
 export function getDbData(): AppData {
-  try {
-    if (!fs.existsSync(dataFilePath)) {
-      fs.writeFileSync(dataFilePath, JSON.stringify(initialData, null, 2), 'utf-8');
-      return initialData;
-    }
-    const content = fs.readFileSync(dataFilePath, 'utf-8');
-    const parsed = JSON.parse(content);
-    if (!parsed.notifications) parsed.notifications = initialData.notifications;
-    if (!parsed.settings) parsed.settings = initialData.settings;
-    if (!parsed.financials) parsed.financials = initialData.financials;
-    if (!parsed.sessions) parsed.sessions = initialData.sessions;
-
-    // session бүрт enrolledMemberIds байгаа эсэхийг баталгаажуулах
-    parsed.sessions.forEach((s: any) => {
-      if (!s.enrolledMemberIds) {
-        s.enrolledMemberIds = s.attendedMemberIds || [];
-      }
-    });
-
-    return parsed;
-  } catch (err) {
-    console.error("DB Read error:", err);
-    return initialData;
-  }
+  return {
+    members: [], sessions: [], attendances: [], notifications: [], financials: [],
+    settings: {
+      clubName: "ALDAR BOXING CLUB", coachName: "", monthlyFee: 150000,
+      gymOpenTime: "07:00", gymCloseTime: "22:00", smsNotification: false, currency: "₮",
+    },
+  };
 }
 
-export function saveDbData(data: AppData): void {
-  try {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (err) {
-    console.error("DB Write error:", err);
-  }
+export function saveDbData(_data: AppData): never {
+  throw new Error("Энэ хэсгийн өгөгдлийн хадгалалт дараагийн үе шатанд холбогдоно.");
 }

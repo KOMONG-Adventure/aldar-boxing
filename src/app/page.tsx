@@ -18,7 +18,7 @@ import {
 import { Member, SessionItem, AttendanceRecord, AppNotification, AppSettings, FinancialLog } from "@/lib/db";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"members" | "schedule" | "timer" | "finance">("schedule");
+  const [activeTab, setActiveTab] = useState<"members" | "schedule" | "timer" | "finance">("members");
   const [members, setMembers] = useState<Member[]>([]);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
@@ -39,11 +39,13 @@ export default function Home() {
   const [filterLevel, setFilterLevel] = useState("all");
   const [filterPayment, setFilterPayment] = useState<"all" | "paid" | "unpaid">("all");
   const [loading, setLoading] = useState(true);
+  const [memberLoadError, setMemberLoadError] = useState("");
 
   // Бүх өгөгдлийг татах
   const fetchAllData = async () => {
     try {
       setLoading(true);
+      setMemberLoadError("");
       const [membersRes, attRes, settRes, finRes] = await Promise.all([
         fetch("/api/members"),
         fetch("/api/attendance"),
@@ -54,6 +56,8 @@ export default function Home() {
       if (membersRes.ok) {
         const memData = await membersRes.json();
         setMembers(memData);
+      } else {
+        setMemberLoadError("Сурагчдын бүртгэлтэй холбогдож чадсангүй. Дахин шинэчилнэ үү.");
       }
       if (attRes.ok) {
         const attData = await attRes.json();
@@ -71,6 +75,7 @@ export default function Home() {
       }
     } catch (e) {
       console.error(e);
+      setMemberLoadError("Сурагчдын бүртгэл татахад алдаа гарлаа. Дахин шинэчилнэ үү.");
     } finally {
       setLoading(false);
     }
@@ -213,6 +218,7 @@ export default function Home() {
 
       {/* --- MAIN BODY --- */}
       <main className="max-w-2xl mx-auto w-full px-4 pt-4 flex-1 space-y-4">
+        {memberLoadError && <p role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{memberLoadError}</p>}
         
         {/* Картууд: Статистик */}
         <div className="grid grid-cols-3 gap-2">
@@ -243,13 +249,13 @@ export default function Home() {
         <div className="bg-gradient-to-r from-[#17171c] to-[#121215] border border-zinc-800 rounded-3xl p-4 flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold text-red-400 uppercase tracking-wider flex items-center gap-1">
-              <Sparkles size={13} /> Бүртгэл & Анги хуваарилалт
+              <Sparkles size={13} /> Сурагчийн бүртгэл
             </span>
-            <h2 className="text-base font-bold text-white mt-0.5">Шинэ гишүүн бүртгэх & QR</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">Сурагчийг бэлтгэлийн ангид шууд хуваарилах</p>
+            <h2 className="text-base font-bold text-white mt-0.5">Шинэ сурагч бүртгэх</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">Хувийн мэдээлэл, профайл зураг</p>
           </div>
           <div className="flex-shrink-0 pl-2">
-            <AddMemberModal onMemberAdded={fetchAllData} sessions={sessions} />
+            <AddMemberModal onMemberAdded={fetchAllData} />
           </div>
         </div>
 

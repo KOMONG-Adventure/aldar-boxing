@@ -1,20 +1,62 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { 
-  Plus, X, User, Phone, ShieldCheck, Dumbbell, 
-  CheckCircle2, HeartHandshake, MapPin, Calendar, BookOpen
+  Plus, X, User, ShieldCheck, Dumbbell,
+  CheckCircle2, HeartHandshake, MapPin
 } from "lucide-react";
-import { Guardian, SessionItem } from "@/lib/db";
+import { Guardian } from "@/lib/db";
 
 interface AddMemberModalProps {
   onMemberAdded: () => void;
-  sessions?: SessionItem[];
 }
 
-export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemberModalProps) {
+export default function AddMemberModal({ onMemberAdded }: AddMemberModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [photoError, setPhotoError] = useState("");
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setPhotoError("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setPhotoError("JPG, PNG эсвэл WebP зураг сонгоно уу.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError("Зургийн хэмжээ 5 МБ-аас ихгүй байна.");
+      return;
+    }
+    setPhotoLoading(true);
+    try {
+      const image = await createImageBitmap(file);
+      try {
+        const scale = Math.min(1, 512 / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Зураг боловсруулах боломжгүй");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        setAvatarUrl(canvas.toDataURL("image/jpeg", 0.85));
+      } finally {
+        image.close();
+      }
+    } catch {
+      setPhotoError("Зургийг уншиж чадсангүй. Өөр зураг сонгоно уу.");
+    } finally {
+      setPhotoLoading(false);
+    }
+  };
 
   // Үндсэн хувийн мэдээлэл
   const [formData, setFormData] = useState({
@@ -37,9 +79,6 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
     expireDate: "",
   });
 
-  // Сурагчийн бүртгүүлэх хичээлүүд
-  const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
-
   // Асран хамгаалагчид
   const [guardians, setGuardians] = useState<Guardian[]>([
     {
@@ -50,29 +89,18 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
     },
   ]);
 
-  useEffect(() => {
-    if (isOpen) {
-      const today = new Date().toISOString().split("T")[0];
-      const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0];
-      setFormData((prev) => ({
-        ...prev,
-        joinedDate: prev.joinedDate || today,
-        paymentDate: prev.paymentDate || today,
-        expireDate: prev.expireDate || nextMonth,
-      }));
-    }
-  }, [isOpen]);
-
-  const toggleSessionSelect = (sessionId: string) => {
-    setSelectedSessionIds((prev) =>
-      prev.includes(sessionId)
-        ? prev.filter((id) => id !== sessionId)
-        : [...prev, sessionId]
-    );
+  const openRegistration = () => {
+    const today = new Date().toISOString().split("T")[0];
+    const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    setFormData((prev) => ({
+      ...prev,
+      joinedDate: prev.joinedDate || today,
+      paymentDate: prev.paymentDate || today,
+      expireDate: prev.expireDate || nextMonth,
+    }));
+    setSubmitError("");
+    setIsOpen(true);
   };
-
   const addGuardianField = () => {
     setGuardians((prev) => [
       ...prev,
@@ -94,6 +122,8 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (photoLoading || loading) return;
+    setSubmitError("");
     if (!formData.name.trim() || !formData.phone.trim()) {
       alert("Нэр болон утасны дугаараа заавал оруулна уу!");
       return;
@@ -106,7 +136,7 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
       const payload = {
         ...formData,
         guardians: cleanedGuardians,
-        assignedSessionIds: selectedSessionIds,
+        avatarUrl,
       };
 
       const res = await fetch("/api/members", {
@@ -115,9 +145,14 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Алдаа гарлаа");
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.error || "Бүртгэл хадгалахад алдаа гарлаа. Дахин оролдоно уу.");
+      }
 
       setIsOpen(false);
+      setAvatarUrl("");
+      setPhotoError("");
       // Маягтыг цэвэрлэх
       setFormData({
         lastName: "",
@@ -138,11 +173,10 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
         paymentDate: "",
         expireDate: "",
       });
-      setSelectedSessionIds([]);
       setGuardians([{ name: "", phone: "", profession: "", relation: "Аав" }]);
       onMemberAdded();
     } catch (err) {
-      alert("Бүртгэл хадгалахад алдаа гарлаа");
+      setSubmitError(err instanceof Error ? err.message : "Бүртгэл хадгалахад алдаа гарлаа");
     } finally {
       setLoading(false);
     }
@@ -152,7 +186,7 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
     <>
       {/* --- Зураг дээрх улаан "+" товчлуур --- */}
       <div 
-        onClick={() => setIsOpen(true)}
+        onClick={openRegistration}
         className="flex flex-col items-center gap-1.5 cursor-pointer group select-none"
       >
         <button
@@ -180,7 +214,7 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white">Сурагч бүртгэх</h3>
-                  <p className="text-xs text-zinc-400">Хувийн бүртгэл ба бэлтгэлийн анги сонголт</p>
+                  <p className="text-xs text-zinc-400">Сурагчийн хувийн мэдээлэл бүртгэх</p>
                 </div>
               </div>
               <button
@@ -194,6 +228,36 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
 
             {/* Гүйлгэх үндсэн хэсэг (Scrollable Form) */}
             <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 text-xs">
+              <div className="rounded-2xl border border-zinc-800 bg-[#18181c] p-4">
+                <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-3">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Сурагчийн сонгосон профайл зураг" className="h-16 w-16 shrink-0 rounded-2xl border border-zinc-700 object-cover" />
+                  ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-400">
+                      <User size={32} aria-hidden="true" />
+                    </div>
+                  )}
+                  <div className="contents">
+                    <p className="min-w-0 text-sm font-semibold text-white">Профайл зураг</p>
+                    <p id="member-photo-help" className="sr-only">JPG, PNG, WebP · 5 МБ хүртэл · Заавал биш</p>
+                    <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} disabled={photoLoading || loading} aria-label="Сурагчийн профайл зураг сонгох" aria-describedby="member-photo-help member-photo-status" className="hidden" />
+                    <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={handlePhotoChange} disabled={photoLoading || loading} aria-label="Камераар сурагчийн зураг авах" aria-describedby="member-photo-help member-photo-status" className="hidden" />
+                    <div className="col-span-2 grid min-w-0 grid-cols-2 gap-2">
+                      <button type="button" onClick={() => photoInputRef.current?.click()} disabled={photoLoading || loading} className="min-h-10 min-w-0 rounded-xl bg-rose-600 px-2 py-2 font-semibold text-white hover:bg-rose-700 disabled:opacity-50">
+                        Зураг оруулах
+                      </button>
+                      <button type="button" onClick={() => cameraInputRef.current?.click()} disabled={photoLoading || loading} className="min-h-10 min-w-0 rounded-xl border border-zinc-700 bg-zinc-800 px-2 py-2 font-semibold text-zinc-200 hover:bg-zinc-700 disabled:opacity-50">
+                        Зураг авах
+                      </button>
+                      {avatarUrl && (
+                        <button type="button" aria-label="Профайл зураг хасах" onClick={() => { setAvatarUrl(""); setPhotoError(""); }} disabled={photoLoading || loading} className="col-span-2 flex min-h-10 items-center justify-center gap-1 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-rose-400 disabled:opacity-50"><X size={16} /> Зураг хасах</button>
+                      )}
+                    </div>
+                    {photoLoading && <p className="col-span-2 text-zinc-400">Боловсруулж байна...</p>}
+                  </div>
+                </div>
+                <p id="member-photo-status" aria-live="polite" className={photoError ? "mt-2 text-rose-400" : "sr-only"}>{photoError || (photoLoading ? "Зураг боловсруулж байна" : avatarUrl ? "Зураг сонгогдлоо" : "")}</p>
+              </div>
               
               {/* 1. ХУВИЙН МЭДЭЭЛЭЛ */}
               <div className="space-y-4">
@@ -399,48 +463,7 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
                 </div>
               </div>
 
-              {/* 2. СУРАГЧИЙГ ХУВААРИЙН АНГИД ХАРЬЯАЛУУЛАХ (Шинэ чухал боломж!) */}
-              <div className="space-y-3 pt-2">
-                <h4 className="text-sm font-bold text-white tracking-wide border-b border-zinc-800 pb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <BookOpen size={16} className="text-rose-500" /> Бэлтгэлийн ангид бүртгэх
-                  </span>
-                  <span className="text-[10px] text-zinc-400 font-normal">Сонгох ({selectedSessionIds.length})</span>
-                </h4>
-                
-                {sessions.length === 0 ? (
-                  <p className="text-zinc-500 text-[11px] italic">Одоогоор анги үүсгээгүй байна. Дараа нь нэмж болно.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {sessions.map((s) => {
-                      const isSelected = selectedSessionIds.includes(s.id);
-                      return (
-                        <div
-                          key={s.id}
-                          onClick={() => toggleSessionSelect(s.id)}
-                          className={`p-3 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
-                            isSelected
-                              ? "bg-red-600/15 border-red-500/60 text-white"
-                              : "bg-[#18181c] border-zinc-800 text-zinc-400 hover:text-zinc-200"
-                          }`}
-                        >
-                          <div>
-                            <span className="font-bold text-xs block text-white">{s.title}</span>
-                            <span className="text-[10px] text-zinc-400">{s.time} • {s.coach} ({s.dayOfWeek})</span>
-                          </div>
-                          <div className={`w-5 h-5 rounded-lg flex items-center justify-center border transition ${
-                            isSelected ? "bg-red-600 border-red-500 text-white" : "border-zinc-700 bg-zinc-900"
-                          }`}>
-                            {isSelected && <CheckCircle2 size={13} />}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* 3. АСРАН ХАМГААЛАГЧИЙН ХЭСЭГ */}
+              {/* 2. АСРАН ХАМГААЛАГЧИЙН ХЭСЭГ */}
               <div className="space-y-4 pt-2">
                 <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
                   <h4 className="text-sm font-bold text-white tracking-wide flex items-center gap-2">
@@ -451,8 +474,21 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
                 {guardians.map((g, idx) => (
                   <div 
                     key={idx}
-                    className="bg-[#18181c] border border-zinc-800 p-4 rounded-2xl space-y-3 relative group"
+                    className="bg-[#18181c] border border-zinc-800 p-4 rounded-2xl grid grid-cols-2 gap-3 relative group"
                   >
+                    {idx > 0 && (
+                      <div className="col-span-2 flex items-center justify-between">
+                        <span className="text-zinc-400">Асран хамгаалагч {idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeGuardianField(idx)}
+                          aria-label={`Асран хамгаалагч ${idx + 1}-ийг хасах`}
+                          className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition focus-visible:outline-2 focus-visible:outline-rose-500"
+                        >
+                          <X size={16} /> Хасах
+                        </button>
+                      </div>
+                    )}
                     <div>
                       <label className="text-zinc-300 font-medium mb-1.5 block">Овог нэр</label>
                       <input
@@ -512,7 +548,7 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
                 </button>
               </div>
 
-              {/* 4. ТӨЛБӨРИЙН СУУРЬ */}
+              {/* 3. ТӨЛБӨРИЙН СУУРЬ */}
               <div className="bg-[#18181c] p-4 rounded-2xl border border-zinc-800 space-y-3">
                 <label className="text-zinc-300 font-medium block">Төлбөрийн анхны төлөв</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -543,9 +579,10 @@ export default function AddMemberModal({ onMemberAdded, sessions = [] }: AddMemb
 
               {/* ТОМ УЛААН СУРАГЧ БҮРТГЭХ ТОВЧ */}
               <div className="pt-2 sticky bottom-0 bg-[#141416]/95 backdrop-blur-sm pb-1">
+                {submitError && <p role="alert" className="mb-3 text-rose-400">{submitError}</p>}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || photoLoading}
                   className="w-full bg-[#d00000] hover:bg-red-700 active:scale-[0.99] text-white font-bold py-3.5 rounded-2xl transition duration-150 shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                 >
                   <ShieldCheck size={20} />

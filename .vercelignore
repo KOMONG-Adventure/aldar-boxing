@@ -1,0 +1,9 @@
+.git
+.env*
+data.json
+backups
+node_modules
+.next
+tests
+supabase
+docs

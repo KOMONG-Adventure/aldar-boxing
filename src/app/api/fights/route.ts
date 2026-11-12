@@ -1,5 +1,6 @@
+import { getStudentAppData as getDbData, saveStudentAppData as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
-import { getDbData, saveDbData, FightRecord } from '@/lib/db';
+import { FightRecord } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Сурагчийн ID болон өрсөлдөгч шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     const member = data.members.find(m => m.id === memberId);
     if (!member) {
       return NextResponse.json({ error: "Сурагч олдсонгүй" }, { status: 404 });
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     if (!member.fights) member.fights = [];
     member.fights.unshift(newFight);
 
-    saveDbData(data);
+    await saveDbData(data);
     return NextResponse.json(newFight, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });

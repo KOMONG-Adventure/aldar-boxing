@@ -1,8 +1,9 @@
+import { getStudentAppData as getDbData, saveStudentAppData as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
-import { getDbData, saveDbData, SessionItem } from '@/lib/db';
+import { SessionItem } from '@/lib/db';
 
 export async function GET() {
-  const data = getDbData();
+  const data = await getDbData();
   return NextResponse.json(data.sessions);
 }
 
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Гарчиг болон цаг заавал шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     const newSession: SessionItem = {
       id: "s_" + Date.now(),
       title,
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       });
     }
 
-    saveDbData(data);
+    await saveDbData(data);
     return NextResponse.json(newSession, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
@@ -80,7 +81,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "sessionId шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     const session = data.sessions.find(s => s.id === sessionId);
     if (!session) {
       return NextResponse.json({ error: "Хичээл олдсонгүй" }, { status: 404 });
@@ -96,7 +97,7 @@ export async function PATCH(request: Request) {
       session.enrolledMemberIds = session.enrolledMemberIds.filter(id => id !== memberId);
     }
 
-    saveDbData(data);
+    await saveDbData(data);
     return NextResponse.json(session);
   } catch (error) {
     return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
@@ -109,7 +110,7 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: "ID шаардлагатай" }, { status: 400 });
 
-    const data = getDbData();
+    const data = await getDbData();
     data.sessions = data.sessions.filter(s => s.id !== id);
     // Сурагчдын бүртгэлээс хасах
     data.members.forEach(m => {
@@ -118,7 +119,7 @@ export async function DELETE(request: Request) {
       }
     });
 
-    saveDbData(data);
+    await saveDbData(data);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Устгахад алдаа гарлаа" }, { status: 500 });

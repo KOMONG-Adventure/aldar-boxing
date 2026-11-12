@@ -1,5 +1,6 @@
+import { getStudentAppData as getDbData, saveStudentAppData as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
-import { getDbData, saveDbData, PaymentHistoryItem, FinancialLog } from '@/lib/db';
+import { PaymentHistoryItem, FinancialLog } from '@/lib/db';
 
 // Сурагчийн төлбөрийн түүх авах
 export async function GET(request: Request) {
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "memberId шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     const member = data.members.find(m => m.id === memberId);
     if (!member) {
       return NextResponse.json({ error: "Гишүүн олдсонгүй" }, { status: 404 });
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "memberId болон expireDate шаардлагатай" }, { status: 400 });
     }
 
-    const data = getDbData();
+    const data = await getDbData();
     const member = data.members.find(m => m.id === memberId);
     if (!member) {
       return NextResponse.json({ error: "Гишүүн олдсонгүй" }, { status: 404 });
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
       read: false
     });
 
-    saveDbData(data);
+    await saveDbData(data);
 
     return NextResponse.json({ 
       success: true, 

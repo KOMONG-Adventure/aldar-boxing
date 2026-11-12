@@ -1,12 +1,13 @@
+import { getStudentAppData as getDbData, saveStudentAppData as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
-import { getDbData, saveDbData, AttendanceRecord } from '@/lib/db';
+import { AttendanceRecord } from '@/lib/db';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date');
   const sessionId = searchParams.get('sessionId');
 
-  const data = getDbData();
+  const data = await getDbData();
   let list = data.attendances || [];
 
   if (date) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     const targetDate = date || new Date().toISOString().split('T')[0];
-    const data = getDbData();
+    const data = await getDbData();
     const session = data.sessions.find(s => s.id === sessionId);
     const member = data.members.find(m => m.id === memberId);
 
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
       if (existingIndex >= 0) {
         data.attendances.splice(existingIndex, 1);
         member.attendancesCount = Math.max(0, (member.attendancesCount || 1) - 1);
-        saveDbData(data);
+        await saveDbData(data);
       }
       return NextResponse.json({ success: true, attended: false });
     } else {
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
         };
         data.attendances.unshift(record);
         member.attendancesCount = (member.attendancesCount || 0) + 1;
-        saveDbData(data);
+        await saveDbData(data);
       }
       return NextResponse.json({ success: true, attended: true });
     }
