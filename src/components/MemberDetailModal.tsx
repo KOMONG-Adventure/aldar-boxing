@@ -7,7 +7,7 @@ import {
   Shield, Award, Calendar, CheckCircle2, QrCode, 
   Download, Printer, AlertCircle, Plus, Trophy, Flame,
   Edit3, Save, RotateCcw, Clock, CreditCard, Receipt, 
-  Banknote, ArrowUpRight, History
+  Banknote, ArrowUpRight, History, ZoomIn
 } from "lucide-react";
 import { Member, FightRecord, PaymentHistoryItem } from "@/lib/db";
 import SiblingBilling from "./SiblingBilling";
@@ -27,6 +27,7 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
   const [saving, setSaving] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showAddFight, setShowAddFight] = useState(false);
+  const photoDialogRef = useRef<HTMLDialogElement>(null);
 
   // Шинэ төлбөр бүртгэх модал/хэсэг
   const [showAddPayment, setShowAddPayment] = useState(false);
@@ -232,28 +233,33 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
       <div className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-lg text-white shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Толгой хэсэг */}
-        <div className="flex justify-between items-center px-6 py-4 border-b border-zinc-800 shrink-0 bg-[#17171a]">
-          <div className="flex items-center gap-3">
+        <div className="flex justify-between items-center gap-3 px-4 sm:px-6 py-4 border-b border-zinc-800 shrink-0 bg-[#17171a]">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             {editForm.avatarUrl ? (
-              <img
-                src={editForm.avatarUrl}
-                alt={editForm.name}
-                className="w-12 h-12 rounded-2xl object-cover border border-zinc-700 shadow-md"
-              />
+              <button
+                type="button"
+                onClick={() => photoDialogRef.current?.showModal()}
+                aria-label={`${editForm.name} сурагчийн зургийг томруулах`}
+                aria-haspopup="dialog"
+                className="group relative h-20 w-20 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-2xl border border-zinc-600 shadow-md cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+              >
+                <img src={editForm.avatarUrl} alt={editForm.name} className="h-full w-full object-cover transition group-hover:scale-105" />
+                <span className="absolute bottom-1 right-1 rounded-lg bg-black/70 p-1.5 text-white" aria-hidden="true"><ZoomIn size={15} /></span>
+              </button>
             ) : (
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-red-600/30">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center font-bold text-2xl text-white shadow-lg shadow-red-600/30">
                 {editForm.name.substring(0, 2).toUpperCase()}
               </div>
             )}
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <div className="min-w-0">
+              <h3 className="break-words text-sm sm:text-base font-bold text-white">
                 {editForm.lastName ? `${editForm.lastName} ` : ""}{editForm.name}
               </h3>
-              <p className="text-xs text-zinc-400">📞 {editForm.phone} • Элссэн: {editForm.joinedDate || "Тодорхойгүй"}</p>
+              <p className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] sm:text-xs text-zinc-400"><span>📞 {editForm.phone}</span><span>Элссэн: {editForm.joinedDate || "Тодорхойгүй"}</span></p>
             </div>
           </div>
           
-          <div className="flex items-center gap-1.5">
+          <div className="flex shrink-0 self-start items-center gap-1.5">
             {activeTab === "profile" && (
               <button
                 onClick={() => setIsEditing(!isEditing)}
@@ -1026,6 +1032,20 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
 
         </div>
       </div>
+      <dialog
+        ref={photoDialogRef}
+        aria-labelledby="member-photo-title"
+        onClick={event => { if (event.target === event.currentTarget) event.currentTarget.close(); }}
+        className="fixed inset-0 m-auto w-[calc(100%_-_1.5rem)] max-w-3xl max-h-[92dvh] rounded-2xl border border-zinc-700 bg-[#141416] p-0 text-white shadow-2xl backdrop:bg-black/90 backdrop:backdrop-blur-sm"
+      >
+        <div className="p-3 sm:p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 id="member-photo-title" className="min-w-0 break-words text-sm font-semibold">{editForm.lastName} {editForm.name}</h2>
+            <button type="button" onClick={() => photoDialogRef.current?.close()} aria-label="Зураг хаах" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"><X size={22} /></button>
+          </div>
+          {editForm.avatarUrl && <img src={editForm.avatarUrl} alt={`${editForm.name} сурагчийн томруулсан зураг`} className="h-[min(70dvh,720px)] w-full rounded-xl bg-black object-contain" />}
+        </div>
+      </dialog>
     </div>
   );
 }
