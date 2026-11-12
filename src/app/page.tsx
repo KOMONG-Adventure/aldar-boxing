@@ -57,7 +57,8 @@ export default function Home() {
         const memData = await membersRes.json();
         setMembers(memData);
       } else {
-        setMemberLoadError("Сурагчдын бүртгэлтэй холбогдож чадсангүй. Дахин шинэчилнэ үү.");
+        const errorData = await membersRes.json().catch(() => null);
+        setMemberLoadError(errorData?.error || "Сурагчдын бүртгэлтэй холбогдож чадсангүй. Дахин шинэчилнэ үү.");
       }
       if (attRes.ok) {
         const attData = await attRes.json();

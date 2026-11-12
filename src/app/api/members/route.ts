@@ -2,6 +2,13 @@ import { getStudentAppData as getDbData, saveMemberRegistration as saveDbData } 
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { Member } from '@/lib/db';
+import { SupabaseConfigurationError } from '@/lib/supabase/server';
+
+function configurationErrorResponse(error: unknown) {
+  if (error instanceof SupabaseConfigurationError) {
+    return NextResponse.json({ error: error.message, code: 'SUPABASE_CONFIGURATION_MISSING' }, { status: 503 });
+  }
+}
 
 export async function GET() {
   try {
@@ -9,6 +16,8 @@ export async function GET() {
     return NextResponse.json(data.members, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     console.error('Student registration read failed', error);
+    const configurationError = configurationErrorResponse(error);
+    if (configurationError) return configurationError;
     return NextResponse.json({ error: 'Сурагчдын бүртгэл татахад алдаа гарлаа. Дахин оролдоно уу.' }, { status: 503 });
   }
 }
@@ -91,6 +100,8 @@ export async function POST(request: Request) {
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {
     console.error('Student registration create failed', error);
+    const configurationError = configurationErrorResponse(error);
+    if (configurationError) return configurationError;
     return NextResponse.json({ error: "Серверийн алдаа гарлаа" }, { status: 500 });
   }
 }
@@ -115,6 +126,8 @@ export async function DELETE(request: Request) {
     await saveDbData(data);
     return NextResponse.json({ success: true });
   } catch (error) {
+    const configurationError = configurationErrorResponse(error);
+    if (configurationError) return configurationError;
     return NextResponse.json({ error: "Устгахад алдаа гарлаа" }, { status: 500 });
   }
 }
@@ -154,6 +167,8 @@ export async function PATCH(request: Request) {
     await saveDbData(data);
     return NextResponse.json(target);
   } catch (error) {
+    const configurationError = configurationErrorResponse(error);
+    if (configurationError) return configurationError;
     return NextResponse.json({ error: "Шинэчлэхэд алдаа гарлаа" }, { status: 500 });
   }
 }
