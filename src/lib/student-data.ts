@@ -4,6 +4,7 @@ import { getDbData, type AppData, type Member } from "./db";
 import { fromStudentRow, toStudentRow, type StudentRow } from "./student-fields";
 import { getSupabaseAdmin, STUDENT_PHOTOS_BUCKET } from "./supabase/server";
 import { getPayments, toPaymentHistory } from "./payment-data";
+import { getSessions } from "./session-data";
 
 type Snapshot = { rows: Map<string, StudentRow>; avatars: Map<string, string> };
 const snapshots = new WeakMap<AppData, Snapshot>();
@@ -32,7 +33,8 @@ export async function getStudentAppData(): Promise<AppData> {
     }
   }
   local.members = rows.map(row => fromStudentRow(row, avatars.get(row.avatar_path || "")));
-  const payments = await getPayments();
+  const [payments, sessions] = await Promise.all([getPayments(), getSessions()]);
+  local.sessions = sessions;
   const historyByStudent = new Map<string, NonNullable<Member["paymentHistory"]>>();
   for (const payment of payments) {
     if (!payment.student_id) continue;
@@ -40,7 +42,10 @@ export async function getStudentAppData(): Promise<AppData> {
     history.push(toPaymentHistory(payment));
     historyByStudent.set(payment.student_id, history);
   }
-  for (const member of local.members) member.paymentHistory = historyByStudent.get(member.id) || [];
+  for (const member of local.members) {
+    member.paymentHistory = historyByStudent.get(member.id) || [];
+    member.assignedSessionIds = sessions.filter(session => session.enrolledMemberIds.includes(member.id)).map(session => session.id);
+  }
   snapshots.set(local, {
     rows: new Map(rows.map(row => [row.id, row])),
     avatars: new Map(local.members.map(member => [member.id, member.avatarUrl || ""])),

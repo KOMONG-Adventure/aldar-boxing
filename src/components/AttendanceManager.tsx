@@ -1,14 +1,29 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { 
-  Calendar as CalendarIcon, Clock, Users, UserCheck, 
-  Check, X, Search, ChevronLeft, ChevronRight, 
-  Sparkles, CheckCircle2, AlertCircle, Dumbbell, 
-  Trash2, Plus, Filter, UserX
+import React, { useState } from "react";
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Users,
+  UserCheck,
+  Check,
+  X,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Dumbbell,
+  Trash2,
+  Plus,
+  Filter,
+  UserX,
 } from "lucide-react";
 import { SessionItem, Member, AttendanceRecord } from "@/lib/db";
 import AddSessionModal from "./AddSessionModal";
+import { billingToday } from "@/lib/billing";
+import { scheduleSummary, sessionSlots, slotsOnDate } from "@/lib/schedules";
 
 interface AttendanceManagerProps {
   sessions: SessionItem[];
@@ -24,32 +39,35 @@ export default function AttendanceManager({
   onRefresh,
 }: AttendanceManagerProps) {
   // Огноо
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [todayStr, setTodayStr] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(billingToday);
+  const todayStr = billingToday();
+  const [showAllSessions, setShowAllSessions] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string>(
-    sessions[0]?.id || ""
+    sessions[0]?.id || "",
   );
   const [searchMember, setSearchMember] = useState("");
   const [activeView, setActiveView] = useState<"enrolled" | "all">("enrolled");
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setSelectedDate(today);
-    setTodayStr(today);
-  }, []);
-
-  useEffect(() => {
-    if (!selectedSessionId && sessions.length > 0) {
-      setSelectedSessionId(sessions[0].id);
-    }
-  }, [sessions, selectedSessionId]);
-
   // Сонгогдсон анги
-  const currentSession = sessions.find((s) => s.id === selectedSessionId) || sessions[0];
+  const daySessions = sessions.filter(
+    (session) => slotsOnDate(session, selectedDate).length > 0,
+  );
+  const visibleSessions = showAllSessions ? sessions : daySessions;
+  const currentSession =
+    visibleSessions.find((session) => session.id === selectedSessionId) ||
+    visibleSessions[0];
+  const currentSlots = currentSession
+    ? slotsOnDate(currentSession, selectedDate)
+    : [];
+
+  const handleSessionSaved = () => {
+    setShowAllSessions(true);
+    onRefresh();
+  };
 
   // Тухайн өдөр, тухайн ангийн ирцүүд
   const dayAttendances = attendances.filter(
-    (a) => a.date === selectedDate && (!selectedSessionId || a.sessionId === selectedSessionId)
+    (a) => a.date === selectedDate && a.sessionId === currentSession?.id,
   );
 
   const attendedMemberIds = dayAttendances.map((a) => a.memberId);
@@ -58,17 +76,18 @@ export default function AttendanceManager({
   const changeDateByDays = (days: number) => {
     if (!selectedDate) return;
     const d = new Date(selectedDate);
-    d.setDate(d.getDate() + days);
+    d.setUTCDate(d.getUTCDate() + days);
     setSelectedDate(d.toISOString().split("T")[0]);
+    setShowAllSessions(false);
   };
 
   const isToday = selectedDate === todayStr && todayStr !== "";
 
   // Ирц тэмдэглэх эсвэл цуцлах
   const handleToggleAttendance = async (memberId: string) => {
-    if (!currentSession) return;
+    if (!currentSession || currentSlots.length === 0) return;
     try {
-      await fetch("/api/attendance", {
+      const response = await fetch("/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,6 +97,7 @@ export default function AttendanceManager({
           action: "TOGGLE",
         }),
       });
+      if (!response.ok) throw new Error("Ирц хадгалах боломжгүй байна.");
       onRefresh();
     } catch (e) {
       alert("Ирц бүртгэхэд алдаа гарлаа");
@@ -86,10 +106,12 @@ export default function AttendanceManager({
 
   // "Бүгдийг ирсэн болгох" (Mark All Present)
   const handleMarkAllPresent = async () => {
-    if (!currentSession) return;
+    if (!currentSession || currentSlots.length === 0) return;
     const enrolledIds = currentSession.enrolledMemberIds || [];
-    const toCheckIn = enrolledIds.filter((id) => !attendedMemberIds.includes(id));
-    
+    const toCheckIn = enrolledIds.filter(
+      (id) => !attendedMemberIds.includes(id),
+    );
+
     if (toCheckIn.length === 0) return;
 
     for (const memberId of toCheckIn) {
@@ -120,23 +142,29 @@ export default function AttendanceManager({
 
   // Жагсаалтад харуулах сурагчдын тооцоо
   const enrolledList = members.filter((m) =>
-    currentSession?.enrolledMemberIds?.includes(m.id)
+    currentSession?.enrolledMemberIds?.includes(m.id),
   );
 
-  const displayList = (activeView === "enrolled" ? enrolledList : members).filter((m) =>
-    `${m.lastName || ""} ${m.name}`.toLowerCase().includes(searchMember.toLowerCase()) ||
-    m.phone.includes(searchMember)
+  const displayList = (
+    activeView === "enrolled" ? enrolledList : members
+  ).filter(
+    (m) =>
+      `${m.lastName || ""} ${m.name}`
+        .toLowerCase()
+        .includes(searchMember.toLowerCase()) || m.phone.includes(searchMember),
   );
 
   // Ирцийн хувь
-  const attendedCount = enrolledList.filter((m) => attendedMemberIds.includes(m.id)).length;
-  const attendanceRate = enrolledList.length > 0 
-    ? Math.round((attendedCount / enrolledList.length) * 100) 
-    : 0;
+  const attendedCount = enrolledList.filter((m) =>
+    attendedMemberIds.includes(m.id),
+  ).length;
+  const attendanceRate =
+    enrolledList.length > 0
+      ? Math.round((attendedCount / enrolledList.length) * 100)
+      : 0;
 
   return (
     <div className="space-y-4">
-      
       {/* 1. ОГНОО СОНГОХ СЭЛГЭГЧ (Date Switcher - Gymdesk style) */}
       <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-3 sm:p-4 flex items-center justify-between shadow-lg">
         <button
@@ -152,7 +180,10 @@ export default function AttendanceManager({
           <input
             type="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            onChange={(e) => {
+              setSelectedDate(e.target.value);
+              setShowAllSessions(false);
+            }}
             className="bg-transparent text-white font-bold text-sm sm:text-base cursor-pointer focus:outline-none border-b border-transparent hover:border-zinc-700"
           />
           {isToday && (
@@ -177,20 +208,44 @@ export default function AttendanceManager({
           <span className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
             <Clock size={15} className="text-red-500" /> Бэлтгэлийн цагууд
           </span>
-          <AddSessionModal onSessionAdded={onRefresh} members={members} />
+          <AddSessionModal
+            onSessionAdded={handleSessionSaved}
+            members={members}
+          />
         </div>
 
-        {sessions.length === 0 ? (
+        <div className="flex gap-2">
+          <button
+            type="button"
+            aria-pressed={!showAllSessions}
+            onClick={() => setShowAllSessions(false)}
+            className={`rounded-xl border px-3 py-2 text-xs ${!showAllSessions ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-zinc-800 text-zinc-400"}`}
+          >
+            Энэ өдөр ({daySessions.length})
+          </button>
+          <button
+            type="button"
+            aria-pressed={showAllSessions}
+            onClick={() => setShowAllSessions(true)}
+            className={`rounded-xl border px-3 py-2 text-xs ${showAllSessions ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-zinc-800 text-zinc-400"}`}
+          >
+            Бүх анги ({sessions.length})
+          </button>
+        </div>
+
+        {visibleSessions.length === 0 ? (
           <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 text-center text-zinc-500 text-xs">
-            Бэлтгэлийн хуваарь үүсгээгүй байна. Дээрх "+ Анги үүсгэх" товчоор нэмнэ үү.
+            {sessions.length === 0
+              ? "Бэлтгэлийн хуваарь үүсгээгүй байна. Анги үүсгэх товчоор нэмнэ үү."
+              : "Энэ өдөр бэлтгэлийн хуваарь байхгүй байна. Бүх анги хэсгээс бусад хуваарийг харна уу."}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            {sessions.map((s) => {
+            {visibleSessions.map((s) => {
               const isSelected = s.id === currentSession?.id;
               // Энэ өдөр тухайн ангид ирсэн тоо
               const sCount = attendances.filter(
-                (a) => a.date === selectedDate && a.sessionId === s.id
+                (a) => a.date === selectedDate && a.sessionId === s.id,
               ).length;
               const totalEnrolled = s.enrolledMemberIds?.length || 0;
 
@@ -205,31 +260,54 @@ export default function AttendanceManager({
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-white truncate max-w-[150px]">{s.title}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSession(s.id, s.title);
-                      }}
-                      className="text-zinc-600 hover:text-red-400 p-1 rounded-lg"
-                      title="Анги устгах"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    <span className="text-xs font-bold text-white truncate max-w-[150px]">
+                      {s.title}
+                    </span>
+                    <div className="flex shrink-0 items-center">
+                      <AddSessionModal
+                        session={s}
+                        members={members}
+                        onSessionAdded={handleSessionSaved}
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSession(s.id, s.title);
+                        }}
+                        className="text-zinc-600 hover:text-red-400 p-1 rounded-lg"
+                        title="Анги устгах"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="mt-2 flex items-center justify-between text-[11px]">
-                    <span className="text-red-400 font-semibold">{s.time}</span>
+                    <span className="text-red-400 font-semibold">
+                      {slotsOnDate(s, selectedDate)
+                        .map((slot) => `${slot.startTime}–${slot.endTime}`)
+                        .join(", ") || "Энэ өдөр хуваарьгүй"}
+                    </span>
                     <span className="text-zinc-400 font-medium">
-                      Ирц: <b className="text-white">{sCount}</b> / {totalEnrolled}
+                      Ирц: <b className="text-white">{sCount}</b> /{" "}
+                      {totalEnrolled}
                     </span>
                   </div>
 
-                  <p className="text-[10px] text-zinc-500 mt-1 truncate">
-                    {s.coach} • {s.dayOfWeek}
+                  <div className="mt-2 space-y-1 text-[11px] text-zinc-300">
+                    {scheduleSummary(sessionSlots(s)).map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                    {s.scheduleType === "single" && (
+                      <p>{s.specificDate} · Нэг удаа</p>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mt-2">
+                    {s.coach}
                     {s.startDate && (
                       <span className="text-zinc-400 block mt-0.5 font-normal">
-                        Хугацаа: {s.startDate} {s.endDate ? `~ ${s.endDate}` : "эхлэн"}
+                        Хугацаа: {s.startDate}{" "}
+                        {s.endDate ? `~ ${s.endDate}` : "эхлэн"}
                       </span>
                     )}
                   </p>
@@ -241,20 +319,24 @@ export default function AttendanceManager({
       </div>
 
       {/* 3. ИРЦИЙН АМАРХАН БҮРТГЭЛИЙН ИНТЕРФЭЙС (One-Click Attendance Sheet) */}
-      {currentSession && (
+      {currentSession && currentSlots.length > 0 && (
         <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
-          
           {/* Ангийн толгой ба Статистик прогресс */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black text-white">{currentSession.title}</h3>
+                <h3 className="text-base font-black text-white">
+                  {currentSession.title}
+                </h3>
                 <span className="text-[11px] bg-red-600/20 text-red-400 px-2 py-0.5 rounded-lg border border-red-500/30 font-bold">
-                  {currentSession.time}
+                  {currentSlots
+                    .map((slot) => `${slot.startTime}–${slot.endTime}`)
+                    .join(", ")}
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Дасгалжуулагч: {currentSession.coach} • Багтаамж: {currentSession.capacity}
+                Дасгалжуулагч: {currentSession.coach} • Багтаамж:{" "}
+                {currentSession.capacity}
               </p>
             </div>
 
@@ -263,7 +345,9 @@ export default function AttendanceManager({
               <div>
                 <div className="flex justify-between text-[11px] gap-4">
                   <span className="text-zinc-400">Ирцийн хувь</span>
-                  <span className="font-bold text-white">{attendedCount}/{enrolledList.length} ({attendanceRate}%)</span>
+                  <span className="font-bold text-white">
+                    {attendedCount}/{enrolledList.length} ({attendanceRate}%)
+                  </span>
                 </div>
                 <div className="w-28 sm:w-32 bg-zinc-800 h-2 rounded-full overflow-hidden mt-1.5">
                   <div
@@ -272,7 +356,7 @@ export default function AttendanceManager({
                   />
                 </div>
               </div>
-              
+
               {/* Бүгдийг ирсэн болгох хурдан үйлдэл */}
               <button
                 onClick={handleMarkAllPresent}
@@ -287,7 +371,10 @@ export default function AttendanceManager({
           {/* Хайлт ба Табууд: (Энэ ангийнхан / Бүх сурагчид) */}
           <div className="flex flex-col sm:flex-row gap-2 justify-between">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 text-zinc-500" size={15} />
+              <Search
+                className="absolute left-3 top-2.5 text-zinc-500"
+                size={15}
+              />
               <input
                 type="text"
                 placeholder="Сурагчийн нэр, утсаар хайх..."
@@ -325,14 +412,17 @@ export default function AttendanceManager({
           <div className="space-y-2">
             {displayList.length === 0 ? (
               <div className="text-center py-8 text-zinc-500 text-xs bg-[#18181c] rounded-2xl border border-zinc-800/80">
-                Сурагч олдсонгүй. "Бүх сурагчид" табыг сонгож эсвэл "Шинэ гишүүн" нэмнэ үү.
+                Сурагч олдсонгүй. «Бүх сурагчид» табыг сонгож эсвэл «Шинэ
+                гишүүн» нэмнэ үү.
               </div>
             ) : (
               displayList.map((m) => {
                 const isAttended = attendedMemberIds.includes(m.id);
                 const isPaid = m.status === "PAID";
                 const isExpired = new Date(m.expireDate) < new Date();
-                const attRecord = dayAttendances.find((a) => a.memberId === m.id);
+                const attRecord = dayAttendances.find(
+                  (a) => a.memberId === m.id,
+                );
 
                 return (
                   <div
@@ -351,27 +441,32 @@ export default function AttendanceManager({
                           src={m.avatarUrl}
                           alt={m.name}
                           className={`w-10 h-10 rounded-xl object-cover shrink-0 border transition ${
-                            isAttended 
-                              ? "border-emerald-500 shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/30" 
+                            isAttended
+                              ? "border-emerald-500 shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/30"
                               : "border-zinc-700"
                           }`}
                         />
                       ) : (
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 transition ${
-                          isAttended 
-                            ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30" 
-                            : "bg-gradient-to-br from-zinc-750 to-zinc-800 text-zinc-300 border border-zinc-700/60 group-hover:border-zinc-500"
-                        }`}>
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 transition ${
+                            isAttended
+                              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                              : "bg-gradient-to-br from-zinc-750 to-zinc-800 text-zinc-300 border border-zinc-700/60 group-hover:border-zinc-500"
+                          }`}
+                        >
                           {m.name.substring(0, 2).toUpperCase()}
                         </div>
                       )}
 
                       <div className="truncate">
                         <div className="flex items-center gap-2">
-                          <span className={`font-bold text-xs sm:text-sm truncate ${
-                            isAttended ? "text-white" : "text-zinc-200"
-                          }`}>
-                            {m.lastName ? `${m.lastName} ` : ""}{m.name}
+                          <span
+                            className={`font-bold text-xs sm:text-sm truncate ${
+                              isAttended ? "text-white" : "text-zinc-200"
+                            }`}
+                          >
+                            {m.lastName ? `${m.lastName} ` : ""}
+                            {m.name}
                           </span>
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400">
                             {m.level}
@@ -380,10 +475,16 @@ export default function AttendanceManager({
                         <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
                           <span>📞 {m.phone}</span>
                           <span>•</span>
-                          <span className={`${
-                            isPaid && !isExpired ? "text-emerald-400" : "text-red-400 font-semibold"
-                          }`}>
-                            {isPaid && !isExpired ? "Төлбөр OK" : "Төлбөр дууссан"}
+                          <span
+                            className={`${
+                              isPaid && !isExpired
+                                ? "text-emerald-400"
+                                : "text-red-400 font-semibold"
+                            }`}
+                          >
+                            {isPaid && !isExpired
+                              ? "Төлбөр OK"
+                              : "Төлбөр дууссан"}
                           </span>
                         </div>
                       </div>
@@ -427,11 +528,14 @@ export default function AttendanceManager({
       {/* 4. СҮҮЛД БҮРТГЭГДСЭН ИРЦИЙН ЖАГСААЛТ (History Feed) */}
       <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-4">
         <h4 className="text-xs font-bold text-zinc-300 mb-3 flex items-center gap-1.5">
-          <Clock size={14} className="text-red-500" /> {selectedDate} өдрийн бүртгэгдсэн ирцийн бүртгэл
+          <Clock size={14} className="text-red-500" /> {selectedDate} өдрийн
+          бүртгэгдсэн ирцийн бүртгэл
         </h4>
         <div className="space-y-1.5">
           {dayAttendances.length === 0 ? (
-            <p className="text-zinc-500 text-xs text-center py-4">Энэ өдөр ирц бүртгэгдээгүй байна</p>
+            <p className="text-zinc-500 text-xs text-center py-4">
+              Энэ өдөр ирц бүртгэгдээгүй байна
+            </p>
           ) : (
             dayAttendances.map((att) => (
               <div
@@ -440,16 +544,21 @@ export default function AttendanceManager({
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="text-white font-semibold">{att.memberName}</span>
-                  <span className="text-zinc-400 text-[11px]">({att.sessionTitle})</span>
+                  <span className="text-white font-semibold">
+                    {att.memberName}
+                  </span>
+                  <span className="text-zinc-400 text-[11px]">
+                    ({att.sessionTitle})
+                  </span>
                 </div>
-                <span className="text-zinc-500 font-mono text-[11px]">{att.checkInTime}</span>
+                <span className="text-zinc-500 font-mono text-[11px]">
+                  {att.checkInTime}
+                </span>
               </div>
             ))
           )}
         </div>
       </div>
-
     </div>
   );
 }

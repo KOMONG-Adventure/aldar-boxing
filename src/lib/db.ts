@@ -60,6 +60,12 @@ export interface Member {
   monthlyFee?: number;
 }
 
+export interface SessionTimeSlot {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
 export interface SessionItem {
   id: string;
   title: string;
@@ -75,6 +81,7 @@ export interface SessionItem {
   startDate?: string; // YYYY-MM-DD
   endDate?: string;   // YYYY-MM-DD
   enrolledMemberIds: string[]; // Тухайн хичээлд бүртгэлтэй сурагчдын ID жагсаалт
+  timeSlots?: SessionTimeSlot[];
 }
 
 export interface AttendanceRecord {
