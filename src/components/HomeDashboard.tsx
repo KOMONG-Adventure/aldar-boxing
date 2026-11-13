@@ -27,12 +27,12 @@ export default function Home() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [financials, setFinancials] = useState<FinancialLog[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
-    clubName: "CHAMPION BOXING",
-    coachName: "Мастер Болд",
+    clubName: "ALDAR BOXING CLUB",
+    coachName: "",
     monthlyFee: 100000,
     gymOpenTime: "07:00",
     gymCloseTime: "22:00",
-    smsNotification: true,
+    smsNotification: false,
     currency: "₮"
   });
 
@@ -191,6 +191,7 @@ export default function Home() {
             <SettingsModal 
               settings={settings} 
               onRefresh={fetchAllData} 
+              disabled={loading || !!memberLoadError}
             />
           </div>
 

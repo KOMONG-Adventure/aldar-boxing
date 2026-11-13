@@ -8,9 +8,10 @@ import { AppSettings } from "@/lib/db";
 interface SettingsModalProps {
   settings: AppSettings;
   onRefresh: () => void;
+  disabled?: boolean;
 }
 
-export default function SettingsModal({ settings, onRefresh }: SettingsModalProps) {
+export default function SettingsModal({ settings, onRefresh, disabled = false }: SettingsModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<AppSettings>(settings);
   const [saving, setSaving] = useState(false);
@@ -38,6 +39,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
     <>
       {/* Тохиргооны товч */}
       <button
+        disabled={disabled}
         onClick={() => {
           setForm(settings);
           setIsOpen(true);
