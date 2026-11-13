@@ -14,19 +14,21 @@ import SiblingBilling from "./SiblingBilling";
 import { billingToday, paymentEndDate } from "@/lib/billing";
 
 interface MemberDetailModalProps {
+  initialTab?: "profile" | "payments" | "card";
   member: Member;
   members: Member[];
   onClose: () => void;
-  onTogglePayment: (member: Member) => void;
   onRefresh: () => void;
 }
 
-export default function MemberDetailModal({ member, members, onClose, onTogglePayment, onRefresh }: MemberDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<"profile" | "payments" | "card" | "fights">("profile");
+export default function MemberDetailModal({ member, members, onClose, onRefresh, initialTab = "profile" }: MemberDetailModalProps) {
+  const [activeTab, setActiveTab] = useState<"profile" | "payments" | "card" | "fights">(initialTab);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showAddFight, setShowAddFight] = useState(false);
+  const [fightSubmitting, setFightSubmitting] = useState(false);
+  const fightId = useRef<string | null>(null);
   const photoDialogRef = useRef<HTMLDialogElement>(null);
 
   // Шинэ төлбөр бүртгэх модал/хэсэг
@@ -193,7 +195,9 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
 
   const handleAddFight = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fightForm.opponent) return;
+    if (!fightForm.opponent || fightSubmitting) return;
+    setFightSubmitting(true);
+    fightId.current ||= crypto.randomUUID();
 
     try {
       const res = await fetch("/api/fights", {
@@ -201,10 +205,13 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           memberId: member.id,
+          requestId: fightId.current,
           ...fightForm
         })
       });
+      if (!res.ok) throw new Error("Тулаан хадгалах боломжгүй.");
       if (res.ok) {
+        fightId.current = null;
         setShowAddFight(false);
         setFightForm({
           opponent: "",
@@ -218,6 +225,8 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
       }
     } catch (err) {
       alert("Тулаан нэмэхэд алдаа гарлаа");
+    } finally {
+      setFightSubmitting(false);
     }
   };
 
@@ -584,6 +593,7 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
 
               {showAddFight && (
                 <form onSubmit={handleAddFight} className="bg-[#18181c] border border-zinc-800 p-3.5 rounded-2xl space-y-3">
+                  <fieldset disabled={fightSubmitting} className="space-y-3">
                   <div>
                     <label className="text-[11px] text-zinc-300 block mb-1">Өрсөлдөгчийн нэр *</label>
                     <input
@@ -648,6 +658,7 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
                   >
                     Хадгалах
                   </button>
+                  </fieldset>
                 </form>
               )}
 
@@ -687,7 +698,7 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
             <div className="space-y-4">
               <div 
                 id="member-club-card" 
-                className="bg-gradient-to-br from-[#1c1c22] via-[#121215] to-[#09090b] border-2 border-red-600/40 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden"
+                className="print-student-card bg-gradient-to-br from-[#1c1c22] via-[#121215] to-[#09090b] border-2 border-red-600/40 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden"
               >
                 <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
                   <div className="text-left">
@@ -733,12 +744,15 @@ export default function MemberDetailModal({ member, members, onClose, onTogglePa
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={handlePrint}
+                    disabled={!qrDataUrl}
                   className="py-2.5 px-3 bg-[#1e1e24] hover:bg-zinc-800 border border-zinc-700/80 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                 >
                   <Printer size={15} /> Карт хэвлэх
                 </button>
                 <a
                   href={qrDataUrl}
+                    aria-disabled={!qrDataUrl}
+                    onClick={event => { if (!qrDataUrl) event.preventDefault(); }}
                   download={`boxing-card-${editForm.name}.png`}
                   className="py-2.5 px-3 bg-red-600 hover:bg-red-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition text-white shadow-md shadow-red-600/20"
                 >

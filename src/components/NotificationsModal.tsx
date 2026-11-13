@@ -15,14 +15,15 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
 
   const markAllAsRead = async () => {
     try {
-      await fetch('/api/settings', {
+      const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'mark_all_read' })
       });
+      if (!response.ok) throw new Error("Мэдэгдэл шинэчлэх боломжгүй.");
       onRefresh();
     } catch (e) {
-      console.error(e);
+      alert("Мэдэгдэл шинэчлэхэд алдаа гарлаа.");
     }
   };
 

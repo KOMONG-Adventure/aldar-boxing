@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Settings, X, Save, Clock, DollarSign, BellRing, Shield } from "lucide-react";
 import { AppSettings } from "@/lib/db";
 
@@ -18,11 +19,12 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
     e.preventDefault();
     setSaving(true);
     try {
-      await fetch('/api/settings', {
+      const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'update_settings', settings: form })
       });
+      if (!response.ok) throw new Error("Тохиргоо хадгалах боломжгүй.");
       onRefresh();
       setIsOpen(false);
     } catch (e) {
@@ -47,7 +49,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
       </button>
 
       {/* Попап */}
-      {isOpen && (
+      {isOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md text-white shadow-2xl p-6 relative">
             <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
@@ -96,7 +98,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
                   <input
                     type="number"
                     value={form.monthlyFee}
-                    onChange={(e) => setForm({ ...form, monthlyFee: Number(e.target.value) })}
+                  readOnly
                     className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 pl-9 pr-3 text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
@@ -128,7 +130,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
                   <BellRing size={16} className="text-red-500" />
                   <div>
                     <span className="font-semibold text-white block">Төлбөрийн сануулга</span>
-                    <span className="text-[10px] text-zinc-400">Хугацаа дуусах үед авто сануулах</span>
+                    <span className="text-[10px] text-zinc-400">Хугацаа дуусахад аппын мэдэгдэлд харуулах</span>
                   </div>
                 </div>
                 <input
@@ -152,7 +154,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }

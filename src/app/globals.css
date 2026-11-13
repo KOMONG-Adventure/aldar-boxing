@@ -66,3 +66,15 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   scrollbar-width: none;
 }
 
+@media print {
+  body * { visibility: hidden; }
+  .print-student-card, .print-student-card * { visibility: visible; }
+  .print-student-card {
+    position: fixed;
+    inset: 12mm auto auto 12mm;
+    width: 85mm;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+

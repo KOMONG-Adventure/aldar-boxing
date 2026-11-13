@@ -16,7 +16,7 @@ export default function BoxingTimer() {
   // Дууны дохио (Web Audio API - ямар ч гадны файл шаардахгүй цэвэр synth)
   const playSound = (freq = 800, type: OscillatorType = "sine", duration = 0.4) => {
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new window.AudioContext();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = type;
@@ -27,49 +27,45 @@ export default function BoxingTimer() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
+      osc.onended = () => { void audioCtx.close(); };
     } catch (e) {
       console.error(e);
     }
   };
 
   useEffect(() => {
-    let interval: any = null;
-
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev === 4) {
-            playSound(600, "square", 0.15); // 3 секундийн өмнөх анхааруулга
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else if (isActive && timeLeft === 0) {
-      // Үе дуусах үед
-      if (!isResting) {
-        // Раунд дууслаа -> Амралт эхэлнэ
-        playSound(450, "sine", 0.8);
-        if (currentRound < totalRounds) {
-          setIsResting(true);
-          setTimeLeft(restTime);
-        } else {
-          // Бүх раунд дууслаа
-          setIsActive(false);
-          playSound(1000, "square", 1.2);
-        }
-      } else {
-        // Амралт дууслаа -> Дараагийн раунд
+    if (!isActive) return;
+    const tick = window.setTimeout(() => {
+      if (timeLeft > 1) {
+        if (timeLeft === 4) playSound(600, "square", 0.15);
+        setTimeLeft(timeLeft - 1);
+        return;
+      }
+      if (isResting) {
         playSound(900, "sine", 0.6);
         setIsResting(false);
-        setCurrentRound((r) => r + 1);
+        setCurrentRound(currentRound + 1);
         setTimeLeft(roundTime);
+        return;
       }
-    }
-
-    return () => clearInterval(interval);
+      playSound(450, "sine", 0.8);
+      if (currentRound < totalRounds) {
+        setIsResting(true);
+        setTimeLeft(restTime);
+      } else {
+        setTimeLeft(0);
+        setIsActive(false);
+        playSound(1000, "square", 1.2);
+      }
+    }, 1000);
+    return () => window.clearTimeout(tick);
   }, [isActive, timeLeft, isResting, currentRound, roundTime, restTime, totalRounds]);
-
   const toggleTimer = () => {
+    if (!isActive && timeLeft === 0) {
+      setIsResting(false);
+      setCurrentRound(1);
+      setTimeLeft(roundTime);
+    }
     if (!isActive) playSound(800, "sine", 0.3);
     setIsActive(!isActive);
   };
@@ -151,19 +147,19 @@ export default function BoxingTimer() {
       {/* Тохиргооны хурдан сонголтууд */}
       <div className="grid grid-cols-3 gap-2 pt-1 text-center">
         <button
-          onClick={() => { setRoundTime(180); setRestTime(60); resetTimer(); }}
+          onClick={() => { setRoundTime(180); setRestTime(60); resetTimer(); setTimeLeft(180); }}
           className="p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl text-[11px] text-zinc-300 border border-zinc-700/50 transition"
         >
           🥊 Мэргэжлийн (3 мин / 1 мин)
         </button>
         <button
-          onClick={() => { setRoundTime(120); setRestTime(60); resetTimer(); }}
+          onClick={() => { setRoundTime(120); setRestTime(60); resetTimer(); setTimeLeft(120); }}
           className="p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl text-[11px] text-zinc-300 border border-zinc-700/50 transition"
         >
           ⚡ Сонирхогч (2 мин / 1 мин)
         </button>
         <button
-          onClick={() => { setRoundTime(60); setRestTime(30); resetTimer(); }}
+          onClick={() => { setRoundTime(60); setRestTime(30); resetTimer(); setTimeLeft(60); }}
           className="p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-xl text-[11px] text-zinc-300 border border-zinc-700/50 transition"
         >
           🔥 HIIT Спринт (1 мин / 30 сек)

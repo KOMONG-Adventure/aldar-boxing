@@ -5,6 +5,7 @@ import { fromStudentRow, toStudentRow, type StudentRow } from "./student-fields"
 import { getSupabaseAdmin, STUDENT_PHOTOS_BUCKET } from "./supabase/server";
 import { getPayments, toPaymentHistory } from "./payment-data";
 import { getSessions } from "./session-data";
+import { getAttendance, getFights } from "./operations-data";
 
 type Snapshot = { rows: Map<string, StudentRow>; avatars: Map<string, string> };
 const snapshots = new WeakMap<AppData, Snapshot>();
@@ -33,7 +34,8 @@ export async function getStudentAppData(): Promise<AppData> {
     }
   }
   local.members = rows.map(row => fromStudentRow(row, avatars.get(row.avatar_path || "")));
-  const [payments, sessions] = await Promise.all([getPayments(), getSessions()]);
+  const [payments, sessions, attendances, fights] = await Promise.all([getPayments(), getSessions(), getAttendance(), getFights()]);
+  local.attendances = attendances;
   local.sessions = sessions;
   const historyByStudent = new Map<string, NonNullable<Member["paymentHistory"]>>();
   for (const payment of payments) {
@@ -43,6 +45,8 @@ export async function getStudentAppData(): Promise<AppData> {
     historyByStudent.set(payment.student_id, history);
   }
   for (const member of local.members) {
+    member.fights = fights.get(member.id) || [];
+    member.attendancesCount = attendances.filter(a => a.memberId === member.id).length;
     member.paymentHistory = historyByStudent.get(member.id) || [];
     member.assignedSessionIds = sessions.filter(session => session.enrolledMemberIds.includes(member.id)).map(session => session.id);
   }

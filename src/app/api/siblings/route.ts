@@ -1,7 +1,9 @@
-﻿import { NextResponse } from "next/server";
+import { teacherAccess } from "@/lib/teacher-auth";
+import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const { memberId, siblingId, confirmed } = await request.json();
     if (typeof memberId !== "string" || !memberId ||

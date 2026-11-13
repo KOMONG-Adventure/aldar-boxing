@@ -47,6 +47,7 @@ export default function AttendanceManager({
   );
   const [searchMember, setSearchMember] = useState("");
   const [activeView, setActiveView] = useState<"enrolled" | "all">("enrolled");
+  const [attendanceSaving, setAttendanceSaving] = useState(false);
 
   // Сонгогдсон анги
   const daySessions = sessions.filter(
@@ -85,7 +86,8 @@ export default function AttendanceManager({
 
   // Ирц тэмдэглэх эсвэл цуцлах
   const handleToggleAttendance = async (memberId: string) => {
-    if (!currentSession || currentSlots.length === 0) return;
+    if (!currentSession || currentSlots.length === 0 || attendanceSaving) return;
+    setAttendanceSaving(true);
     try {
       const response = await fetch("/api/attendance", {
         method: "POST",
@@ -94,39 +96,47 @@ export default function AttendanceManager({
           sessionId: currentSession.id,
           memberId,
           date: selectedDate,
-          action: "TOGGLE",
+          action: attendedMemberIds.includes(memberId) ? "REMOVE" : "CHECKIN",
         }),
       });
       if (!response.ok) throw new Error("Ирц хадгалах боломжгүй байна.");
       onRefresh();
     } catch (e) {
       alert("Ирц бүртгэхэд алдаа гарлаа");
+    } finally {
+      setAttendanceSaving(false);
     }
   };
 
   // "Бүгдийг ирсэн болгох" (Mark All Present)
   const handleMarkAllPresent = async () => {
-    if (!currentSession || currentSlots.length === 0) return;
+    if (!currentSession || currentSlots.length === 0 || attendanceSaving) return;
     const enrolledIds = currentSession.enrolledMemberIds || [];
     const toCheckIn = enrolledIds.filter(
       (id) => !attendedMemberIds.includes(id),
     );
 
     if (toCheckIn.length === 0) return;
+    setAttendanceSaving(true);
 
-    for (const memberId of toCheckIn) {
-      await fetch("/api/attendance", {
+    try {
+      const response = await fetch("/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: currentSession.id,
-          memberId,
+          memberIds: toCheckIn,
           date: selectedDate,
           action: "CHECKIN",
         }),
       });
+      if (!response.ok) throw new Error("Ирц хадгалах боломжгүй.");
+      onRefresh();
+    } catch {
+      alert("Ирц хадгалахад алдаа гарлаа.");
+    } finally {
+      setAttendanceSaving(false);
     }
-    onRefresh();
   };
 
   // Анги устгах
@@ -360,6 +370,7 @@ export default function AttendanceManager({
               {/* Бүгдийг ирсэн болгох хурдан үйлдэл */}
               <button
                 onClick={handleMarkAllPresent}
+                disabled={attendanceSaving}
                 title="Бүртгэлтэй бүх сурагчдыг 1 товшилтоор ирсэнд тооцох"
                 className="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95"
               >
@@ -427,6 +438,15 @@ export default function AttendanceManager({
                 return (
                   <div
                     key={m.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-disabled={attendanceSaving}
+                    onKeyDown={event => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        void handleToggleAttendance(m.id);
+                      }
+                    }}
                     onClick={() => handleToggleAttendance(m.id)}
                     className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 group select-none ${
                       isAttended

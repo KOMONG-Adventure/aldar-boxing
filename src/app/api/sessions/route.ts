@@ -1,4 +1,5 @@
-﻿import { randomUUID } from "node:crypto";
+import { teacherAccess } from "@/lib/teacher-auth";
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { getSessions } from "@/lib/session-data";
@@ -22,6 +23,7 @@ function failure(error: unknown) {
 }
 
 export async function GET(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const date = new URL(request.url).searchParams.get("date");
     if (date && !isScheduleDate(date))
@@ -39,6 +41,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body))
@@ -77,6 +80,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const body = await request.json();
     if (!body || typeof body.sessionId !== "string" || !body.sessionId)
@@ -138,6 +142,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const id = new URL(request.url).searchParams.get("id");
     if (!id) throw new Error("ID шаардлагатай.");

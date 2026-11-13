@@ -1,3 +1,4 @@
+import { teacherAccess } from "@/lib/teacher-auth";
 import { getStudentAppData as getDbData, saveMemberRegistration as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
@@ -10,7 +11,8 @@ function configurationErrorResponse(error: unknown) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const data = await getDbData();
     return NextResponse.json(data.members, { headers: { 'Cache-Control': 'no-store' } });
@@ -23,6 +25,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const body = await request.json();
     const { 
@@ -107,6 +110,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -133,6 +137,7 @@ export async function DELETE(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const denied = await teacherAccess(request); if (denied) return denied;
   try {
     const body = await request.json();
     const { id, status, expireDate, paymentDate, assignedSessionIds, ...updates } = body;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Plus, X, DollarSign, TrendingUp, TrendingDown, Calendar, Tag, ShieldCheck } from "lucide-react";
 import { FinancialLog } from "@/lib/db";
 
@@ -18,6 +18,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
   const [category, setCategory] = useState("Гишүүнчлэл");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
+  const requestId = useRef<string | null>(null);
 
   const totalIncome = financials
     .filter((f) => f.type === "INCOME")
@@ -31,6 +32,8 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    requestId.current ||= crypto.randomUUID();
     if (!title || !amount) {
       alert("Мэдээллийг бүрэн бөглөнө үү");
       return;
@@ -43,6 +46,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type,
+          requestId: requestId.current,
           title,
           amount: Number(amount),
           category,
@@ -53,6 +57,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
       if (!res.ok) throw new Error("Алдаа гарлаа");
 
       setIsOpenModal(false);
+      requestId.current = null;
       setTitle("");
       setAmount("");
       onRefresh();
