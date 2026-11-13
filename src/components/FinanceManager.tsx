@@ -146,10 +146,10 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
       {/* Шинэ гүйлгээний Modal */}
       {isOpenModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md p-6 text-white shadow-2xl relative">
+          <div role="dialog" aria-modal="true" aria-label="Санхүүгийн гүйлгээ" className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md max-h-[90dvh] overflow-y-auto p-6 text-white shadow-2xl relative">
             <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
               <h3 className="text-base font-bold">Гүйлгээ бүртгэх</h3>
-              <button onClick={() => setIsOpenModal(false)} className="text-zinc-400 hover:text-white p-1">
+              <button onClick={() => setIsOpenModal(false)} aria-label="Гүйлгээний цонх хаах" className="text-zinc-400 hover:text-white p-1">
                 <X size={20} />
               </button>
             </div>

@@ -51,7 +51,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
       {/* Попап */}
       {isOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md text-white shadow-2xl p-6 relative">
+          <div role="dialog" aria-modal="true" aria-label="Клубын тохиргоо" className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md max-h-[90dvh] overflow-y-auto text-white shadow-2xl p-6 relative">
             <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-red-600/20 text-red-500 rounded-xl">
@@ -64,6 +64,7 @@ export default function SettingsModal({ settings, onRefresh }: SettingsModalProp
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
+                aria-label="Тохиргоо хаах"
                 className="text-zinc-400 hover:text-white p-1 rounded-lg"
               >
                 <X size={20} />

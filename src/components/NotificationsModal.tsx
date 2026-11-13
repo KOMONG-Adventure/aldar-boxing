@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Bell, Check, Info, AlertTriangle, CheckCircle, Trash2 } from "lucide-react";
 import { AppNotification } from "@/lib/db";
 
@@ -44,13 +45,13 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
       </button>
 
       {/* Попап дэлгэц */}
-      {isOpen && (
+      {isOpen && createPortal(
         <>
           <div 
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)} 
           />
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#161619] border border-zinc-800 rounded-3xl shadow-2xl z-50 p-4 text-xs animate-in fade-in">
+          <div role="dialog" aria-label="Мэдэгдлүүд" className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto sm:left-auto sm:w-96 bg-[#161619] border border-zinc-800 rounded-3xl shadow-2xl z-50 p-4 text-xs animate-in fade-in">
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-1.5 font-bold text-white text-sm">
                 <Bell size={16} className="text-red-500" />
@@ -97,7 +98,7 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
             </div>
           </div>
         </>
-      )}
+      , document.body)}
     </div>
   );
 }
