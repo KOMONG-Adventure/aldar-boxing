@@ -11,6 +11,7 @@ import AttendanceManager from "@/components/AttendanceManager";
 import BoxingTimer from "@/components/BoxingTimer";
 import FinanceManager from "@/components/FinanceManager";
 import * as XLSX from "xlsx";
+import { billingToday } from "@/lib/billing";
 import { 
   Users, Calendar, Search, Trash2, CheckCircle2, AlertCircle,
   RefreshCw, FileSpreadsheet, QrCode, Timer, DollarSign
@@ -154,6 +155,9 @@ export default function Home() {
 
   const paidCount = members.filter((m) => m.status === "PAID").length;
   const unpaidCount = members.filter((m) => m.status === "UNPAID").length;
+  const today = billingToday();
+  const [, month, day] = today.split("-");
+  const weekday = ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"][new Date(`${today}T00:00:00Z`).getUTCDay()];
 
   return (
     <div className="min-h-screen bg-[#101210] text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white pb-24">
@@ -207,7 +211,7 @@ export default function Home() {
                 {{members: "Сурагчид", schedule: "Хуваарь, ирц", timer: "Раунд таймер", finance: "Санхүү"}[activeTab]}
               </h2>
               <p className="mt-2 text-sm text-zinc-400">
-                {new Intl.DateTimeFormat("mn-MN", { timeZone: "Asia/Ulaanbaatar", month: "long", day: "numeric", weekday: "long" }).format(new Date())}
+                {Number(month)} сарын {Number(day)} · {weekday}
               </p>
             </div>
             {activeTab === "members" && <AddMemberModal onMemberAdded={fetchAllData} />}
@@ -351,7 +355,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="ml-auto flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => { setMemberTab("card"); setSelectedMember(m); }}
                           className="p-1.5 bg-zinc-800/70 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl border border-zinc-700/50 transition"
