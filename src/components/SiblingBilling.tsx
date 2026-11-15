@@ -45,7 +45,7 @@ export default function SiblingBilling({ member, members, onRefresh, onPendingCh
   };
 
   return (
-    <div className="space-y-3 rounded-2xl border border-zinc-800 bg-[#19191d] p-4 text-xs">
+    <div className="space-y-3 rounded-xl border border-zinc-800 bg-[#1c201b] p-4 text-xs">
       <div className="flex items-center justify-between gap-3">
         <label className="flex min-h-10 items-center gap-2 font-semibold text-white">
           <input type="checkbox" checked={!!member.siblingId || enabled} disabled={saving || disabled} onChange={event => {
