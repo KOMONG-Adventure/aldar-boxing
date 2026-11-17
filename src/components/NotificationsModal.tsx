@@ -34,11 +34,11 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Мэдэгдэл"
-        className="relative p-2.5 rounded-xl bg-[#181b18] border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
+        className="relative p-2.5 rounded-2xl bg-[#141416] border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
             {unreadCount}
           </span>
         )}
@@ -51,7 +51,7 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)} 
           />
-          <div role="dialog" aria-label="Мэдэгдлүүд" className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto sm:left-auto sm:w-96 bg-[#161619] border border-zinc-800 rounded-2xl  z-50 p-4 text-xs animate-in fade-in">
+          <div role="dialog" aria-label="Мэдэгдлүүд" className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto sm:left-auto sm:w-96 bg-[#161619] border border-zinc-800 rounded-3xl shadow-2xl z-50 p-4 text-xs animate-in fade-in">
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-1.5 font-bold text-white text-sm">
                 <Bell size={16} className="text-red-500" />
@@ -74,10 +74,10 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
                 notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-3 rounded-xl border transition flex items-start gap-2.5 ${
+                    className={`p-3 rounded-2xl border transition flex items-start gap-2.5 ${
                       !n.read 
                         ? 'bg-[#1e1e23] border-zinc-700/80 text-white' 
-                        : 'bg-[#181b18] border-zinc-800/60 text-zinc-400'
+                        : 'bg-[#121215] border-zinc-800/60 text-zinc-400'
                     }`}
                   >
                     <div className="mt-0.5">

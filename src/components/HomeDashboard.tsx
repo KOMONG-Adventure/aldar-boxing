@@ -8,18 +8,20 @@ import NotificationsModal from "@/components/NotificationsModal";
 import SettingsModal from "@/components/SettingsModal";
 import MemberDetailModal from "@/components/MemberDetailModal";
 import AttendanceManager from "@/components/AttendanceManager";
-import BoxingTimer from "@/components/BoxingTimer";
+import PaymentOverview from "@/components/PaymentOverview";
 import FinanceManager from "@/components/FinanceManager";
 import * as XLSX from "xlsx";
-import { billingToday } from "@/lib/billing";
+import { studentPaymentState } from "@/lib/billing";
 import { 
-  Users, Calendar, Search, Trash2, CheckCircle2, AlertCircle,
-  RefreshCw, FileSpreadsheet, QrCode, Timer, DollarSign
+  Users, Calendar, CreditCard, Dumbbell, Search,
+  Trash2, CheckCircle2, AlertCircle, Clock,
+  Sparkles, RefreshCw, ChevronRight, UserCheck,
+  FileSpreadsheet, QrCode, DollarSign, Trophy
 } from "lucide-react";
 import { Member, SessionItem, AttendanceRecord, AppNotification, AppSettings, FinancialLog } from "@/lib/db";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"members" | "schedule" | "timer" | "finance">("members");
+  const [activeTab, setActiveTab] = useState<"members" | "schedule" | "billing" | "finance">("members");
   const [members, setMembers] = useState<Member[]>([]);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
@@ -111,7 +113,7 @@ export default function Home() {
       "Өндөр /см/": m.height || "",
       "Цусны бүлэг": m.bloodType || "",
       "Дүүрэг": m.district || "",
-      "Төлбөрийн төлөв": m.status === "PAID" ? "Төлсөн" : "Төлөөгүй",
+      "Төлбөрийн төлөв": ["active", "expiring"].includes(studentPaymentState(m).kind) ? "Төлсөн" : "Төлөөгүй",
       "Эхэлсэн огноо": m.paymentDate,
       "Дуусах огноо": m.expireDate,
       "Ирцийн тоо": m.attendancesCount || 0,
@@ -141,6 +143,7 @@ export default function Home() {
   };
 
   const filteredMembers = members.filter((m) => {
+    const paid = ["active", "expiring"].includes(studentPaymentState(m).kind);
     const fullName = `${m.lastName || ""} ${m.name}`.toLowerCase();
     const matchesQuery = fullName.includes(searchQuery.toLowerCase()) || m.phone.includes(searchQuery);
     const matchesLevel = filterLevel === "all" || m.level === filterLevel;
@@ -148,30 +151,27 @@ export default function Home() {
       filterPayment === "all" 
         ? true 
         : filterPayment === "paid" 
-        ? m.status === "PAID" 
-        : m.status === "UNPAID";
+        ? paid
+        : !paid;
     return matchesQuery && matchesLevel && matchesPayment;
   });
 
-  const paidCount = members.filter((m) => m.status === "PAID").length;
-  const unpaidCount = members.filter((m) => m.status === "UNPAID").length;
-  const today = billingToday();
-  const [, month, day] = today.split("-");
-  const weekday = ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"][new Date(`${today}T00:00:00Z`).getUTCDay()];
+  const paidCount = members.filter(m => ["active", "expiring"].includes(studentPaymentState(m).kind)).length;
+  const unpaidCount = members.length - paidCount;
 
   return (
-    <div className="min-h-screen bg-[#101210] text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white pb-24">
       
       {/* --- TOP HEADER --- */}
-      <header className="sticky top-0 z-40 bg-[#101210]/90 backdrop-blur-md border-b border-zinc-800/80 px-5 sm:px-8 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#0c0c0e]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
-            <div className="w-9 h-9 shrink-0 rounded-lg border border-red-500/40 bg-red-600/10 flex items-center justify-center">
-              <span className="text-lg font-bold tracking-tighter text-red-400">A</span>
+            <div className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center shadow-md shadow-red-600/30">
+              <Dumbbell className="text-white" size={22} />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-sm sm:text-base font-bold tracking-tight text-white">
+              <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-white">
                 {settings.clubName}
               </h1>
             </div>
@@ -182,7 +182,7 @@ export default function Home() {
             <button
               onClick={fetchAllData}
               title="Шинэчлэх"
-              className="p-2.5 rounded-xl bg-[#181b18] border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition"
+              className="p-2.5 rounded-2xl bg-[#141416] border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition"
             >
               <RefreshCw size={17} className={loading ? "animate-spin text-red-500" : ""} />
             </button>
@@ -201,27 +201,48 @@ export default function Home() {
       </header>
 
       {/* --- MAIN BODY --- */}
-      <main className="max-w-5xl mx-auto w-full px-5 sm:px-8 pt-4 flex-1 space-y-6">
-        {memberLoadError && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{memberLoadError}</p>}
+      <main className="max-w-2xl mx-auto w-full px-4 pt-4 flex-1 space-y-4">
+        {memberLoadError && <p role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{memberLoadError}</p>}
         
-        <section className="border-b border-zinc-800 pb-6 pt-3 sm:pt-7">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100">
-                {{members: "Сурагчид", schedule: "Хуваарь, ирц", timer: "Раунд таймер", finance: "Санхүү"}[activeTab]}
-              </h2>
-              <p className="mt-2 text-sm text-zinc-400">
-                {Number(month)} сарын {Number(day)} · {weekday}
-              </p>
+        {/* Картууд: Статистик */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-3 flex flex-col justify-between">
+            <span className="text-[11px] font-medium text-zinc-400">Нийт сурагч</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="text-xl sm:text-2xl font-black text-white">{members.length}</span>
+              <span className="text-[10px] text-zinc-500">хүн</span>
             </div>
-            {activeTab === "members" && <AddMemberModal onMemberAdded={fetchAllData} />}
           </div>
-          <dl className="mt-7 grid grid-cols-3 gap-4 divide-x divide-zinc-800">
-            <div><dt className="text-xs text-zinc-400">Нийт сурагч</dt><dd className="mt-2 text-3xl font-medium tabular-nums tracking-tight">{loading ? "—" : members.length}</dd></div>
-            <div className="pl-4"><dt className="text-xs text-zinc-400">Төлсөн</dt><dd className="mt-2 text-3xl font-medium tabular-nums tracking-tight text-emerald-400">{loading ? "—" : paidCount}</dd></div>
-            <div className="pl-4"><dt className="text-xs text-zinc-400">Төлөөгүй</dt><dd className="mt-2 text-3xl font-medium tabular-nums tracking-tight text-red-400">{loading ? "—" : unpaidCount}</dd></div>
-          </dl>
-        </section>
+          <div className="bg-[#121215] border border-emerald-950/40 rounded-2xl p-3 flex flex-col justify-between">
+            <span className="text-[11px] font-medium text-emerald-400/80">Төлсөн</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="text-xl sm:text-2xl font-black text-emerald-400">{paidCount}</span>
+              <span className="text-[10px] text-emerald-500/60">гишүүн</span>
+            </div>
+          </div>
+          <div className="bg-[#121215] border border-red-950/40 rounded-2xl p-3 flex flex-col justify-between">
+            <span className="text-[11px] font-medium text-red-400/80">Төлөөгүй</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="text-xl sm:text-2xl font-black text-red-400">{unpaidCount}</span>
+              <span className="text-[10px] text-red-500/60">гишүүн</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Шинэ гишүүн нэмэх үндсэн улаан товчлуурын хэсэг */}
+        <div className="bg-gradient-to-r from-[#17171c] to-[#121215] border border-zinc-800 rounded-3xl p-4 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-red-400 uppercase tracking-wider flex items-center gap-1">
+              <Sparkles size={13} /> Сурагчийн бүртгэл
+            </span>
+            <h2 className="text-base font-bold text-white mt-0.5">Шинэ сурагч бүртгэх</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">Хувийн мэдээлэл, профайл зураг</p>
+          </div>
+          <div className="flex-shrink-0 pl-2">
+            <AddMemberModal onMemberAdded={fetchAllData} />
+          </div>
+        </div>
+
         {/* --- ТАБ 1: ХУВААРЬ & ИРЦИЙН ШИНЭЧЛЭГДСЭН СИСТЕМ --- */}
         {activeTab === "schedule" && (
           <AttendanceManager
@@ -235,7 +256,7 @@ export default function Home() {
         {/* --- ТАБ 2: ГИШҮҮДИЙН ЖАГСААЛТ --- */}
         {activeTab === "members" && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between"><h3 className="text-sm font-medium text-zinc-300">Бүртгэлийн жагсаалт</h3><RegistrationLink /></div>
+            <RegistrationLink />
             {/* Хайлт ба Экспорт */}
             <div className="flex gap-2 items-center">
               <div className="relative flex-1">
@@ -245,14 +266,14 @@ export default function Home() {
                   placeholder="Овог, нэр эсвэл утсаар хайх..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#181b18] border border-zinc-800 rounded-xl py-2.5 pl-10 pr-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
+                  className="w-full bg-[#121215] border border-zinc-800 rounded-2xl py-2.5 pl-10 pr-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
                 />
               </div>
               
               <button
                 onClick={exportToExcel}
                 title="Excel татах"
-                className="px-3 py-2.5 bg-[#17171c] hover:bg-zinc-800 border border-zinc-700/80 rounded-xl text-xs font-semibold text-zinc-300 flex items-center gap-1.5 transition shrink-0"
+                className="px-3 py-2.5 bg-[#17171c] hover:bg-zinc-800 border border-zinc-700/80 rounded-2xl text-xs font-semibold text-zinc-300 flex items-center gap-1.5 transition shrink-0"
               >
                 <FileSpreadsheet size={16} className="text-emerald-400" />
                 <span className="hidden sm:inline">Excel</span>
@@ -264,7 +285,7 @@ export default function Home() {
               <button
                 onClick={() => setFilterPayment("all")}
                 className={`px-3 py-1.5 rounded-xl border transition shrink-0 ${
-                  filterPayment === "all" ? "bg-zinc-800 border-zinc-600 text-white font-bold" : "bg-[#181b18] border-zinc-800 text-zinc-400"
+                  filterPayment === "all" ? "bg-zinc-800 border-zinc-600 text-white font-bold" : "bg-[#121215] border-zinc-800 text-zinc-400"
                 }`}
               >
                 Бүгд ({members.length})
@@ -272,7 +293,7 @@ export default function Home() {
               <button
                 onClick={() => setFilterPayment("paid")}
                 className={`px-3 py-1.5 rounded-xl border transition shrink-0 ${
-                  filterPayment === "paid" ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 font-bold" : "bg-[#181b18] border-zinc-800 text-zinc-400"
+                  filterPayment === "paid" ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 font-bold" : "bg-[#121215] border-zinc-800 text-zinc-400"
                 }`}
               >
                 Төлсөн ({paidCount})
@@ -280,7 +301,7 @@ export default function Home() {
               <button
                 onClick={() => setFilterPayment("unpaid")}
                 className={`px-3 py-1.5 rounded-xl border transition shrink-0 ${
-                  filterPayment === "unpaid" ? "bg-red-500/20 border-red-500 text-red-400 font-bold" : "bg-[#181b18] border-zinc-800 text-zinc-400"
+                  filterPayment === "unpaid" ? "bg-red-500/20 border-red-500 text-red-400 font-bold" : "bg-[#121215] border-zinc-800 text-zinc-400"
                 }`}
               >
                 Төлөөгүй ({unpaidCount})
@@ -289,7 +310,7 @@ export default function Home() {
               <select
                 value={filterLevel}
                 onChange={(e) => setFilterLevel(e.target.value)}
-                className="bg-[#181b18] border border-zinc-800 rounded-xl px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-red-500 shrink-0"
+                className="bg-[#121215] border border-zinc-800 rounded-xl px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-red-500 shrink-0"
               >
                 <option value="all">Бүх түвшин</option>
                 <option value="Beginner">Beginner</option>
@@ -300,15 +321,16 @@ export default function Home() {
             </div>
 
             {/* Гишүүдийн жагсаалт */}
-            <div className="divide-y divide-zinc-800 border-y border-zinc-800">
+            <div className="space-y-2">
               {filteredMembers.length === 0 ? (
-                <div className="text-center py-12 bg-[#181b18] rounded-2xl border border-zinc-800/80 text-zinc-500 text-xs">
-                  {loading ? "Бүртгэл ачаалж байна…" : "Сурагч олдсонгүй. Хайлтаа өөрчлөх эсвэл сурагч нэмнэ үү."}
+                <div className="text-center py-12 bg-[#121215] rounded-3xl border border-zinc-800/80 text-zinc-500 text-xs">
+                  Сурагч олдсонгүй. Дээрх <b className="text-red-500">+ Шинэ гишүүн</b> товчоор шинээр нэмнэ үү.
                 </div>
               ) : (
                 filteredMembers.map((m) => {
-                  const isPaid = m.status === "PAID";
-                  const isExpired = new Date(m.expireDate) < new Date();
+                  const paymentState = studentPaymentState(m);
+                  const isPaid = paymentState.kind === "active" || paymentState.kind === "expiring";
+                  const isExpired = paymentState.kind === "expired";
                   const fights = m.fights || [];
                   const wins = fights.filter(f => f.result === "WIN").length;
                   const losses = fights.filter(f => f.result === "LOSS").length;
@@ -316,46 +338,46 @@ export default function Home() {
                   return (
                     <div
                       key={m.id}
-                      className="hover:bg-zinc-900/60 transition py-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 group"
+                      className="bg-[#121215] hover:bg-[#16161a] transition border border-zinc-800/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 group"
                     >
                       <div 
                         onClick={() => setSelectedMember(m)}
-                        className="flex items-center gap-3 min-w-0 cursor-pointer flex-1 basis-[55%]"
+                        className="flex items-center gap-3 min-w-0 cursor-pointer flex-1"
                       >
                         {m.avatarUrl ? (
                           <img
                             src={m.avatarUrl}
                             alt={m.name}
-                            className="w-11 h-11 rounded-xl object-cover border border-zinc-700/80 shrink-0 group-hover:border-red-500/60 transition"
+                            className="w-11 h-11 rounded-2xl object-cover border border-zinc-700/80 shrink-0 group-hover:border-red-500/60 transition"
                           />
                         ) : (
-                          <div className="w-11 h-11 rounded-xl bg-zinc-800/90 border border-zinc-700/60 flex items-center justify-center font-bold text-white text-sm shrink-0 group-hover:border-red-500/60 transition">
+                          <div className="w-11 h-11 rounded-2xl bg-zinc-800/90 border border-zinc-700/60 flex items-center justify-center font-bold text-white text-sm shrink-0 group-hover:border-red-500/60 transition">
                             {m.name.substring(0, 2).toUpperCase()}
                           </div>
                         )}
-                        <div className="min-w-0">
+                        <div className="truncate">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm text-white truncate">
                               {m.lastName ? `${m.lastName} ` : ""}{m.name}
                             </span>
-                            <span className="hidden sm:inline-flex text-[10px] text-zinc-400 font-medium">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-medium">
                               {m.level}
                             </span>
                           </div>
                           <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
-                            <span className="tabular-nums">{m.phone}</span>
+                            <span>📞 {m.phone}</span>
                             <span>•</span>
-                            <span className="text-zinc-500">Ирц {m.attendancesCount || 0}</span>
+                            <span className="text-zinc-500">Нийт ирц: {m.attendancesCount || 0}</span>
                             {fights.length > 0 && (
                               <span className="text-[10px] bg-amber-500/15 text-amber-400 px-1.5 py-0.5 rounded font-bold">
-                                 {wins}W - {losses}L
+                                🏆 {wins}W - {losses}L
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
 
-                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => { setMemberTab("card"); setSelectedMember(m); }}
                           className="p-1.5 bg-zinc-800/70 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl border border-zinc-700/50 transition"
@@ -399,9 +421,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* --- ТАБ 3: БОКСЫН РАУНД ТАЙМЕР --- */}
-        {activeTab === "timer" && (
-          <BoxingTimer />
+        {/* Төлбөрийн хугацааны хяналт */}
+        {activeTab === "billing" && (
+          <PaymentOverview members={members} loading={loading} onPayment={member => { setMemberTab("payments"); setSelectedMember(member); }} />
         )}
 
         {/* --- ТАБ 4: САНХҮҮ & ТӨЛБӨРИЙН КАСС --- */}
@@ -416,23 +438,21 @@ export default function Home() {
       </main>
 
       {/* --- МОБАЙЛ BOTTOM NAVIGATION BAR --- */}
-      <nav className="dashboard-nav fixed bottom-0 left-0 right-0 z-40 bg-[#101210]/95 backdrop-blur-lg border-t border-zinc-800/80 py-2.5 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex justify-around items-center">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0c0c0e]/95 backdrop-blur-lg border-t border-zinc-800/80 py-2.5 px-4 sm:px-6">
+        <div className="max-w-md mx-auto flex justify-around items-center">
           <button
             onClick={() => setActiveTab("schedule")}
-            aria-current={activeTab === "schedule" ? "page" : undefined}
-            className={`relative flex flex-col items-center gap-1.5 transition ${
+            className={`flex flex-col items-center gap-1 transition ${
               activeTab === "schedule" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
             <Calendar size={20} />
-            <span className="text-[10px]">Хуваарь</span>
+            <span className="text-[10px]">Хуваарь & Ирц</span>
           </button>
 
           <button
             onClick={() => setActiveTab("members")}
-            aria-current={activeTab === "members" ? "page" : undefined}
-            className={`relative flex flex-col items-center gap-1.5 transition ${
+            className={`flex flex-col items-center gap-1 transition ${
               activeTab === "members" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
@@ -441,25 +461,23 @@ export default function Home() {
           </button>
 
           <button
-            onClick={() => setActiveTab("timer")}
-            aria-current={activeTab === "timer" ? "page" : undefined}
-            className={`relative flex flex-col items-center gap-1.5 transition ${
-              activeTab === "timer" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
+            onClick={() => setActiveTab("billing")}
+            className={`flex flex-col items-center gap-1 transition ${
+              activeTab === "billing" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            <Timer size={20} />
-            <span className="text-[10px]">Таймер</span>
+            <CreditCard size={20} />
+            <span className="text-[10px]">Төлбөрийн хяналт</span>
           </button>
 
           <button
             onClick={() => setActiveTab("finance")}
-            aria-current={activeTab === "finance" ? "page" : undefined}
-            className={`relative flex flex-col items-center gap-1.5 transition ${
+            className={`flex flex-col items-center gap-1 transition ${
               activeTab === "finance" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
             <DollarSign size={20} />
-            <span className="text-[10px]">Санхүү</span>
+            <span className="text-[10px]">Санхүү & Касс</span>
           </button>
         </div>
       </nav>

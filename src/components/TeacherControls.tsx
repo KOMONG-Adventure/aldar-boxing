@@ -56,7 +56,7 @@ export default function TeacherControls() {
             role="dialog"
             aria-modal="true"
             aria-label="Багш урих"
-            className="w-full max-w-sm rounded-xl border border-zinc-700 bg-zinc-900 p-5 space-y-4"
+            className="w-full max-w-sm rounded-2xl border border-zinc-700 bg-zinc-900 p-5 space-y-4"
           >
             <div className="flex items-center justify-between">
               <h2 className="font-bold">Багш урих</h2>

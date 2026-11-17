@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 import {
@@ -201,9 +201,9 @@ export default function AddSessionModal({
             role="dialog"
             aria-modal="true"
             aria-label={session ? "Анги засах" : "Анги үүсгэх"}
-            className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-2xl border border-zinc-800 bg-[#181b18] p-4 text-white  sm:p-6"
+            className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-zinc-800 bg-[#141416] p-4 text-white shadow-2xl sm:p-6"
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-zinc-800 bg-[#181b18] pb-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-zinc-800 bg-[#141416] pb-4">
               <h3 className="flex items-center gap-2 text-base font-bold">
                 <Calendar size={20} className="shrink-0 text-red-500" />
                 {session ? "Бэлтгэлийн анги засах" : "Бэлтгэлийн анги үүсгэх"}
@@ -233,7 +233,7 @@ export default function AddSessionModal({
                     className={inputClass}
                   />
                 </label>
-                <div className="grid grid-cols-2 gap-2 rounded-xl border border-zinc-800 bg-[#18181c] p-1">
+                <div className="grid grid-cols-2 gap-2 rounded-2xl border border-zinc-800 bg-[#18181c] p-1">
                   {(
                     [
                       { value: "recurring", title: "7 хоног бүр" },
@@ -255,7 +255,7 @@ export default function AddSessionModal({
                   (group, index) => (
                     <div
                       key={group.id}
-                      className="space-y-3 rounded-xl border border-zinc-800 bg-[#18181c] p-3.5"
+                      className="space-y-3 rounded-2xl border border-zinc-800 bg-[#18181c] p-3.5"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <h4 className="flex items-center gap-1.5 text-sm font-semibold">
@@ -505,7 +505,7 @@ export default function AddSessionModal({
                     placeholder="Нэр, утсаар хайх"
                     className={inputClass}
                   />
-                  <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-zinc-800 bg-[#18181c] p-2">
+                  <div className="max-h-48 space-y-1 overflow-y-auto rounded-2xl border border-zinc-800 bg-[#18181c] p-2">
                     {visibleMembers.length === 0 ? (
                       <p className="py-4 text-center text-zinc-500">
                         Сурагч олдсонгүй
@@ -514,7 +514,7 @@ export default function AddSessionModal({
                       visibleMembers.map((member) => (
                         <label
                           key={member.id}
-                          className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-zinc-800 bg-[#181b18] p-2.5"
+                          className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-zinc-800 bg-[#141416] p-2.5"
                         >
                           <input
                             type="checkbox"
@@ -545,7 +545,7 @@ export default function AddSessionModal({
                 )}
                 <button
                   type="submit"
-                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-3 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-3 py-3 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50"
                 >
                   <ShieldCheck size={18} />
                   {loading

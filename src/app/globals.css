@@ -1,71 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #101210;
-  --foreground: #edece6;
-  color-scheme: dark;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-interface);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-red-400: #e7a096;
-  --color-red-500: #de7767;
-  --color-red-600: #bd4939;
-  --color-red-700: #a43b2e;
-  --color-rose-300: #e7a096;
-  --color-rose-500: #de7767;
-  --color-rose-600: #bd4939;
-  --color-rose-700: #a43b2e;
-  --color-zinc-100: #edece6;
-  --color-zinc-300: #c7cac2;
-  --color-zinc-400: #9a9f95;
-  --color-zinc-500: #7b8277;
-  --color-zinc-700: #3a4037;
-  --color-zinc-800: #292e27;
-  --color-zinc-900: #1b1e19;
-  --color-zinc-950: #101210;
-  --color-emerald-400: #98c3ad;
-  --color-emerald-500: #6caa8a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #101210;
-    --foreground: #edece6;
+    --background: #0a0a0a;
+    --foreground: #ededed;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-interface), sans-serif;
-  font-feature-settings: "cv11", "ss01";
-  -webkit-tap-highlight-color: transparent;
-}
-
-button, a, input, select, textarea { outline-offset: 4px; }
-button:not(:disabled), a, select { cursor: pointer; }
-button:disabled { cursor: default; }
-button:focus-visible, a:focus-visible { outline: 2px solid #e7a096; }
-input, select, textarea { font: inherit; }
-
-.dashboard-nav { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-.dashboard-nav button { min-height: 44px; min-width: 64px; }
-.dashboard-nav button[aria-current="page"] { color: #edece6; }
-.dashboard-nav button[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  top: -11px;
-  width: 24px;
-  height: 2px;
-  background: #de7767;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 input[type="date"],

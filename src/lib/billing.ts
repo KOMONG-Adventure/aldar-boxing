@@ -14,3 +14,13 @@ export function paymentEndDate(start: string, months: number): string {
   const lastDay = new Date(Date.UTC(year, month - 1 + months + 1, 0)).getUTCDate();
   return new Date(Date.UTC(year, month - 1 + months, Math.min(day, lastDay))).toISOString().slice(0, 10);
 }
+
+export function studentPaymentState(student: { status: string; expireDate: string }, today = billingToday()) {
+  if (student.status !== "PAID" || !student.expireDate || paymentEndDate(student.expireDate, 0) !== student.expireDate) {
+    return { kind: "unpaid" as const, daysLeft: null };
+  }
+  const daysLeft = Math.round((Date.parse(`${student.expireDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000);
+  if (daysLeft < 0) return { kind: "expired" as const, daysLeft };
+  if (daysLeft <= 7) return { kind: "expiring" as const, daysLeft };
+  return { kind: "active" as const, daysLeft };
+}

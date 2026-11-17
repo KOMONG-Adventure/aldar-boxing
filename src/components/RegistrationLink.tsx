@@ -27,12 +27,12 @@ export default function RegistrationLink() {
   };
 
   return (
-    <div className="relative">
-      <button type="button" onClick={openLink} aria-expanded={isOpen} aria-controls="registration-link-panel" className="flex min-h-11 items-center gap-2 px-2 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-100">
+    <div className="rounded-2xl border border-zinc-800 bg-[#121215] p-3">
+      <button type="button" onClick={openLink} aria-expanded={isOpen} aria-controls="registration-link-panel" className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-500/20">
         <LinkIcon size={17} /> Супер линк
       </button>
       {isOpen && (
-        <div id="registration-link-panel" className="absolute right-0 z-30 mt-2 w-[min(360px,calc(100vw-40px))] rounded-xl border border-zinc-700 bg-zinc-900 p-4 space-y-3">
+        <div id="registration-link-panel" className="mt-3 space-y-3">
           <label className="block text-xs text-zinc-400" htmlFor="public-registration-url">Сурагч өөрөө бүртгүүлэх холбоос</label>
           <input id="public-registration-url" readOnly value={url} onFocus={event => event.target.select()} className="w-full min-w-0 rounded-xl border border-zinc-700 bg-zinc-900 p-3 text-sm text-white" />
           <div className="grid grid-cols-2 gap-2">

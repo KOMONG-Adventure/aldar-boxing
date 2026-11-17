@@ -13,9 +13,9 @@ export default function TeacherLogin({ invite }: { invite: string }) {
       .catch(() => setError("Сервертэй холбогдож чадсангүй."));
   }, []);
   return (
-    <main className="min-h-screen bg-[#101210] text-white grid place-items-center p-4">
+    <main className="min-h-screen bg-[#09090b] text-white grid place-items-center p-4">
       <form
-        className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 space-y-4"
+        className="w-full max-w-sm rounded-3xl border border-zinc-800 bg-zinc-900 p-6 space-y-4"
         onSubmit={async (event) => {
           event.preventDefault();
           setBusy(true);
@@ -43,8 +43,7 @@ export default function TeacherLogin({ invite }: { invite: string }) {
           }
         }}
       >
-        <div className="border-b border-zinc-700 pb-5 mb-6"><p className="text-xs font-semibold tracking-[0.2em] text-red-400">ALDAR BOXING CLUB</p></div>
-        <h1 className="font-semibold tracking-tight text-2xl">
+        <h1 className="font-bold text-xl">
           {invite ? "Багшийн эрх үүсгэх" : "Багш нэвтрэх"}
         </h1>
         {invite && (

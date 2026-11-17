@@ -198,7 +198,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
 
   if (publicRegistration && submitted) {
     return (
-      <div className="mx-auto w-full max-w-lg rounded-2xl border border-zinc-800 bg-[#181b18] p-8 text-center text-white">
+      <div className="mx-auto w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#141416] p-8 text-center text-white">
         <CheckCircle2 size={40} className="mx-auto mb-4 text-emerald-400" />
         <h1 className="text-xl font-bold">Бүртгэл амжилттай илгээгдлээ</h1>
         <p className="mt-2 text-sm text-zinc-400">Таны мэдээллийг ALDAR Boxing клуб хүлээн авлаа.</p>
@@ -210,24 +210,31 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
   return (
     <>
       {/* --- Зураг дээрх улаан "+" товчлуур --- */}
-      {!publicRegistration && <button
-          onClick={openRegistration}
+      {!publicRegistration && <div
+        onClick={openRegistration}
+        className="flex flex-col items-center gap-1.5 cursor-pointer group select-none"
+      >
+        <button
           type="button"
-          className="min-h-11 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 transition flex items-center gap-2"
+          aria-label="Шинэ гишүүн"
+          className="w-14 h-14 sm:w-16 sm:h-16 bg-[#e11d48] hover:bg-rose-700 active:scale-95 transition-all duration-200 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-600/30 text-white"
         >
-          <Plus size={17} /> Сурагч нэмэх
+          <Plus size={34} strokeWidth={2.8} />
         </button>
-      }
+        <span className="text-zinc-200 text-xs font-medium tracking-tight group-hover:text-rose-400 transition-colors">
+          Шинэ гишүүн
+        </span>
+      </div>}
 
       {/* --- Бүртгэлийн том Попап (Modal Dialog) --- */}
       {isOpen && (
         <div className={publicRegistration ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"}>
-          <div className={`bg-[#181b18] border border-zinc-800 rounded-2xl w-full max-w-lg mx-auto text-white  relative flex flex-col overflow-hidden ${publicRegistration ? "" : "max-h-[92vh]"}`}>
+          <div className={`bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-lg mx-auto text-white shadow-2xl relative flex flex-col overflow-hidden ${publicRegistration ? "" : "max-h-[92vh]"}`}>
             
             {/* Толгой хэсэг */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-zinc-800/80 shrink-0 bg-[#161619]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-rose-600/20 text-rose-500 rounded-xl flex items-center justify-center border border-rose-500/30">
+                <div className="w-10 h-10 bg-rose-600/20 text-rose-500 rounded-2xl flex items-center justify-center border border-rose-500/30">
                   <Dumbbell size={20} />
                 </div>
                 <div>
@@ -246,12 +253,12 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
 
             {/* Гүйлгэх үндсэн хэсэг (Scrollable Form) */}
             <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 text-xs">
-              <div className="rounded-xl border border-zinc-800 bg-[#18181c] p-4">
+              <div className="rounded-2xl border border-zinc-800 bg-[#18181c] p-4">
                 <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-3">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Сурагчийн сонгосон профайл зураг" className="h-16 w-16 shrink-0 rounded-xl border border-zinc-700 object-cover" />
+                    <img src={avatarUrl} alt="Сурагчийн сонгосон профайл зураг" className="h-16 w-16 shrink-0 rounded-2xl border border-zinc-700 object-cover" />
                   ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-400">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-400">
                       <User size={32} aria-hidden="true" />
                     </div>
                   )}
@@ -445,7 +452,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 </div>
 
                 {/* Гэрийн хаяг (Дүүрэг) */}
-                <div className="bg-[#18181c] p-3.5 rounded-xl border border-zinc-800 space-y-3">
+                <div className="bg-[#18181c] p-3.5 rounded-2xl border border-zinc-800 space-y-3">
                   <label className="text-zinc-300 font-medium block flex items-center gap-1.5">
                     <MapPin size={15} className="text-rose-500" /> Гэрийн хаяг
                   </label>
@@ -492,7 +499,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 {guardians.map((g, idx) => (
                   <div 
                     key={idx}
-                    className="bg-[#18181c] border border-zinc-800 p-4 rounded-xl grid grid-cols-2 gap-3 relative group"
+                    className="bg-[#18181c] border border-zinc-800 p-4 rounded-2xl grid grid-cols-2 gap-3 relative group"
                   >
                     {idx > 0 && (
                       <div className="col-span-2 flex items-center justify-between">
@@ -560,14 +567,14 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                 <button
                   type="button"
                   onClick={addGuardianField}
-                  className="w-full py-2.5 border border-rose-900/60 hover:border-rose-600 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 font-semibold rounded-xl flex items-center justify-center gap-1.5 transition text-xs"
+                  className="w-full py-2.5 border border-rose-900/60 hover:border-rose-600 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 font-semibold rounded-2xl flex items-center justify-center gap-1.5 transition text-xs"
                 >
                   <Plus size={16} /> Асран хамгаалагч нэмэх
                 </button>
               </div>
 
               {/* 3. ТӨЛБӨРИЙН СУУРЬ */}
-              {!publicRegistration && <div className="bg-[#18181c] p-4 rounded-xl border border-zinc-800 space-y-3">
+              {!publicRegistration && <div className="bg-[#18181c] p-4 rounded-2xl border border-zinc-800 space-y-3">
                 <label className="text-zinc-300 font-medium block">Төлбөрийн анхны төлөв</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -596,17 +603,17 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
               </div>}
 
               {/* ТОМ УЛААН СУРАГЧ БҮРТГЭХ ТОВЧ */}
-              <div className="pt-2 sticky bottom-0 bg-[#181b18]/95 backdrop-blur-sm pb-1">
+              <div className="pt-2 sticky bottom-0 bg-[#141416]/95 backdrop-blur-sm pb-1">
                 {submitError && <p role="alert" className="mb-3 text-rose-400">{submitError}</p>}
                 {publicRegistration && !publicFormComplete && <p id="registration-required-help" className="mb-3 text-xs text-zinc-400">Бүх талбар, асран хамгаалагчийн мэдээллийг бөглөж, зураг оруулна уу.</p>}
                 <button
                   type="submit"
                   disabled={loading || photoLoading || (publicRegistration && !publicFormComplete)}
                   aria-describedby={publicRegistration && !publicFormComplete ? "registration-required-help" : undefined}
-                  className="w-full bg-[#bd4939] hover:bg-red-700 active:scale-[0.99] text-white font-bold py-3.5 rounded-xl transition duration-150   flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                  className="w-full bg-[#d00000] hover:bg-red-700 active:scale-[0.99] text-white font-bold py-3.5 rounded-2xl transition duration-150 shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                 >
                   <ShieldCheck size={20} />
-                  {loading ? "Бүртгэж байна..." : publicRegistration ? "Бүртгэл илгээх" : " Сурагч бүртгэх"}
+                  {loading ? "Бүртгэж байна..." : publicRegistration ? "Бүртгэл илгээх" : "💾 Сурагч бүртгэх"}
                 </button>
               </div>
             </form>

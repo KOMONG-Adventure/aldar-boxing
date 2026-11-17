@@ -176,7 +176,7 @@ export default function AttendanceManager({
   return (
     <div className="space-y-4">
       {/* 1. ОГНОО СОНГОХ СЭЛГЭГЧ (Date Switcher - Gymdesk style) */}
-      <div className="bg-[#181b18] border border-zinc-800 rounded-2xl p-3 sm:p-4 flex items-center justify-between ">
+      <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-3 sm:p-4 flex items-center justify-between shadow-lg">
         <button
           onClick={() => changeDateByDays(-1)}
           className="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-zinc-800 transition"
@@ -244,7 +244,7 @@ export default function AttendanceManager({
         </div>
 
         {visibleSessions.length === 0 ? (
-          <div className="bg-[#181b18] border border-zinc-800 rounded-xl p-6 text-center text-zinc-500 text-xs">
+          <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 text-center text-zinc-500 text-xs">
             {sessions.length === 0
               ? "Бэлтгэлийн хуваарь үүсгээгүй байна. Анги үүсгэх товчоор нэмнэ үү."
               : "Энэ өдөр бэлтгэлийн хуваарь байхгүй байна. Бүх анги хэсгээс бусад хуваарийг харна уу."}
@@ -263,10 +263,10 @@ export default function AttendanceManager({
                 <div
                   key={s.id}
                   onClick={() => setSelectedSessionId(s.id)}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all relative ${
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all relative ${
                     isSelected
-                      ? "bg-red-600/10 border-red-500  "
-                      : "bg-[#181b18] border-zinc-800 hover:border-zinc-700"
+                      ? "bg-gradient-to-br from-red-950/40 via-[#18181c] to-[#121215] border-red-500 shadow-md shadow-red-950/40"
+                      : "bg-[#121215] border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
                   <div className="flex justify-between items-start">
@@ -330,12 +330,12 @@ export default function AttendanceManager({
 
       {/* 3. ИРЦИЙН АМАРХАН БҮРТГЭЛИЙН ИНТЕРФЭЙС (One-Click Attendance Sheet) */}
       {currentSession && currentSlots.length > 0 && (
-        <div className="bg-[#181b18] border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-4 ">
+        <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
           {/* Ангийн толгой ба Статистик прогресс */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-base font-black text-white">
                   {currentSession.title}
                 </h3>
                 <span className="text-[11px] bg-red-600/20 text-red-400 px-2 py-0.5 rounded-lg border border-red-500/30 font-bold">
@@ -351,7 +351,7 @@ export default function AttendanceManager({
             </div>
 
             {/* Ирцийн хувь прогресс бар */}
-            <div className="flex items-center gap-3 bg-[#18181c] px-3.5 py-2 rounded-xl border border-zinc-800 shrink-0">
+            <div className="flex items-center gap-3 bg-[#18181c] px-3.5 py-2 rounded-2xl border border-zinc-800 shrink-0">
               <div>
                 <div className="flex justify-between text-[11px] gap-4">
                   <span className="text-zinc-400">Ирцийн хувь</span>
@@ -422,7 +422,7 @@ export default function AttendanceManager({
           {/* СУРАГЧДЫН ИРЦ АВАХ БОДИТ ЖАГСААЛТ (One-Tap Attendance Rows) */}
           <div className="space-y-2">
             {displayList.length === 0 ? (
-              <div className="text-center py-8 text-zinc-500 text-xs bg-[#18181c] rounded-xl border border-zinc-800/80">
+              <div className="text-center py-8 text-zinc-500 text-xs bg-[#18181c] rounded-2xl border border-zinc-800/80">
                 Сурагч олдсонгүй. «Бүх сурагчид» табыг сонгож эсвэл «Шинэ
                 гишүүн» нэмнэ үү.
               </div>
@@ -448,7 +448,7 @@ export default function AttendanceManager({
                       }
                     }}
                     onClick={() => handleToggleAttendance(m.id)}
-                    className={`p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 group select-none ${
+                    className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 group select-none ${
                       isAttended
                         ? "bg-emerald-950/20 border-emerald-500/50 hover:bg-emerald-950/30"
                         : "bg-[#18181c] border-zinc-800/80 hover:border-zinc-700"
@@ -462,7 +462,7 @@ export default function AttendanceManager({
                           alt={m.name}
                           className={`w-10 h-10 rounded-xl object-cover shrink-0 border transition ${
                             isAttended
-                              ? "border-emerald-500   ring-2 ring-emerald-500/30"
+                              ? "border-emerald-500 shadow-md shadow-emerald-600/30 ring-2 ring-emerald-500/30"
                               : "border-zinc-700"
                           }`}
                         />
@@ -470,8 +470,8 @@ export default function AttendanceManager({
                         <div
                           className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 transition ${
                             isAttended
-                              ? "bg-emerald-600 text-white  "
-                              : "bg-zinc-800 text-zinc-300 border border-zinc-700/60 group-hover:border-zinc-500"
+                              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                              : "bg-gradient-to-br from-zinc-750 to-zinc-800 text-zinc-300 border border-zinc-700/60 group-hover:border-zinc-500"
                           }`}
                         >
                           {m.name.substring(0, 2).toUpperCase()}
@@ -493,7 +493,7 @@ export default function AttendanceManager({
                           </span>
                         </div>
                         <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
-                          <span> {m.phone}</span>
+                          <span>📞 {m.phone}</span>
                           <span>•</span>
                           <span
                             className={`${
@@ -520,9 +520,9 @@ export default function AttendanceManager({
 
                       <button
                         type="button"
-                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95  ${
+                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-md ${
                           isAttended
-                            ? "bg-emerald-600 text-white "
+                            ? "bg-emerald-600 text-white shadow-emerald-600/30"
                             : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700"
                         }`}
                       >
@@ -546,7 +546,7 @@ export default function AttendanceManager({
       )}
 
       {/* 4. СҮҮЛД БҮРТГЭГДСЭН ИРЦИЙН ЖАГСААЛТ (History Feed) */}
-      <div className="bg-[#181b18] border border-zinc-800 rounded-2xl p-4">
+      <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-4">
         <h4 className="text-xs font-bold text-zinc-300 mb-3 flex items-center gap-1.5">
           <Clock size={14} className="text-red-500" /> {selectedDate} өдрийн
           бүртгэгдсэн ирцийн бүртгэл
