@@ -3,6 +3,7 @@ import type { PaymentHistoryItem } from "./db";
 import { getSupabaseAdmin } from "./supabase/server";
 
 export interface PaymentRow {
+  receipt_path: string | null;
   id: string;
   student_id: string | null;
   student_name: string;
@@ -23,6 +24,7 @@ export function toPaymentHistory(row: PaymentRow): PaymentHistoryItem {
     periodMonths: row.period_months, startDate: row.start_date, expireDate: row.expire_date,
     method: row.method, note: row.note, siblingName: row.sibling_name || undefined,
     createdAt: row.created_at,
+    hasReceipt: Boolean(row.receipt_path),
   };
 }
 

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Member, FightRecord, PaymentHistoryItem } from "@/lib/db";
 import SiblingBilling from "./SiblingBilling";
+import PaymentReceipt from "./PaymentReceipt";
 import { billingToday, monthlyDueDate, studentPaymentState } from "@/lib/billing";
 
 interface MemberDetailModalProps {
@@ -550,6 +551,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                               Дууссан
                             </span>
                           )}
+                          <PaymentReceipt paymentId={p.id} hasReceipt={p.hasReceipt} />
                         </div>
                       </div>
                     );

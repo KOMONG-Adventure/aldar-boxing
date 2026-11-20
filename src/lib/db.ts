@@ -16,6 +16,7 @@ export interface FightRecord {
 }
 
 export interface PaymentHistoryItem {
+  hasReceipt?: boolean;
   id: string;
   date: string;         // Төлбөр хийсэн өдөр (YYYY-MM-DD)
   amount: number;       // Төлсөн дүн (₮)
