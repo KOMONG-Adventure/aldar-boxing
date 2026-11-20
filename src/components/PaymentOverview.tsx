@@ -86,7 +86,7 @@ export default function PaymentOverview({
             key={key}
             aria-pressed={filter === key}
             onClick={() => setFilter(key)}
-            className={`min-w-0 rounded-2xl border p-3 text-left transition ${filter === key ? "border-red-500/60 bg-red-500/10" : "border-zinc-800 bg-[#121215] hover:border-zinc-700"}`}
+            className={`min-w-0 rounded-2xl border p-3 text-left transition ${filter === key ? "border-red-500/60 bg-red-500/10" : "border-zinc-800 bg-[var(--club-panel)] hover:border-zinc-700"}`}
           >
             <Icon size={17} className={color} />
             <span className="mt-3 block text-xl font-bold text-white">
@@ -105,7 +105,7 @@ export default function PaymentOverview({
           placeholder="Сурагч, асран хамгаалагч, утсаар хайх"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          className="min-h-11 w-full rounded-xl border border-zinc-800 bg-[#121215] py-2 pl-10 pr-3 text-sm text-white focus:outline-none focus:border-red-500"
+          className="min-h-11 w-full rounded-xl border border-zinc-800 bg-[var(--club-panel)] py-2 pl-10 pr-3 text-sm text-white focus:outline-none focus:border-red-500"
         />
       </div>
       {loading ? (
@@ -115,7 +115,7 @@ export default function PaymentOverview({
       ) : visible.length === 0 ? (
         <p
           role="status"
-          className="rounded-2xl border border-zinc-800 bg-[#121215] p-8 text-center text-sm text-zinc-400"
+          className="rounded-2xl border border-zinc-800 bg-[var(--club-panel)] p-8 text-center text-sm text-zinc-400"
         >
           {query
             ? "Хайлтад тохирох сурагч олдсонгүй."
@@ -140,7 +140,7 @@ export default function PaymentOverview({
             return (
               <article
                 key={member.id}
-                className="rounded-2xl border border-zinc-800 bg-[#121215] p-4"
+                className="rounded-2xl border border-zinc-800 bg-[var(--club-panel)] p-4"
               >
                 <div className="flex items-start gap-3">
                   {member.avatarUrl ? (

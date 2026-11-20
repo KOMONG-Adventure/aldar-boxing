@@ -178,7 +178,7 @@ export default function AttendanceManager({
     <div className="space-y-4">
       <AttendanceReport date={selectedDate || todayStr} attendances={attendances} />
       {/* 1. ОГНОО СОНГОХ СЭЛГЭГЧ (Date Switcher - Gymdesk style) */}
-      <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-3 sm:p-4 flex items-center justify-between shadow-lg">
+      <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl p-3 sm:p-4 flex items-center justify-between shadow-lg">
         <button
           onClick={() => changeDateByDays(-1)}
           className="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-zinc-800 transition"
@@ -246,7 +246,7 @@ export default function AttendanceManager({
         </div>
 
         {visibleSessions.length === 0 ? (
-          <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-6 text-center text-zinc-500 text-xs">
+          <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-2xl p-6 text-center text-zinc-500 text-xs">
             {sessions.length === 0
               ? "Бэлтгэлийн хуваарь үүсгээгүй байна. Анги үүсгэх товчоор нэмнэ үү."
               : "Энэ өдөр бэлтгэлийн хуваарь байхгүй байна. Бүх анги хэсгээс бусад хуваарийг харна уу."}
@@ -268,7 +268,7 @@ export default function AttendanceManager({
                   className={`p-3.5 rounded-2xl border cursor-pointer transition-all relative ${
                     isSelected
                       ? "bg-gradient-to-br from-red-950/40 via-[#18181c] to-[#121215] border-red-500 shadow-md shadow-red-950/40"
-                      : "bg-[#121215] border-zinc-800 hover:border-zinc-700"
+                      : "bg-[var(--club-panel)] border-zinc-800 hover:border-zinc-700"
                   }`}
                 >
                   <div className="flex justify-between items-start">
@@ -332,7 +332,7 @@ export default function AttendanceManager({
 
       {/* 3. ИРЦИЙН АМАРХАН БҮРТГЭЛИЙН ИНТЕРФЭЙС (One-Click Attendance Sheet) */}
       {currentSession && currentSlots.length > 0 && (
-        <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+        <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
           {/* Ангийн толгой ба Статистик прогресс */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
             <div>
@@ -353,7 +353,7 @@ export default function AttendanceManager({
             </div>
 
             {/* Ирцийн хувь прогресс бар */}
-            <div className="flex items-center gap-3 bg-[#18181c] px-3.5 py-2 rounded-2xl border border-zinc-800 shrink-0">
+            <div className="flex items-center gap-3 bg-[var(--club-raised)] px-3.5 py-2 rounded-2xl border border-zinc-800 shrink-0">
               <div>
                 <div className="flex justify-between text-[11px] gap-4">
                   <span className="text-zinc-400">Ирцийн хувь</span>
@@ -393,11 +393,11 @@ export default function AttendanceManager({
                 placeholder="Сурагчийн нэр, утсаар хайх..."
                 value={searchMember}
                 onChange={(e) => setSearchMember(e.target.value)}
-                className="w-full bg-[#18181c] border border-zinc-800 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
+                className="w-full bg-[var(--club-raised)] border border-zinc-800 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
               />
             </div>
 
-            <div className="flex gap-1.5 bg-[#18181c] p-1 rounded-xl border border-zinc-800 text-xs shrink-0">
+            <div className="flex gap-1.5 bg-[var(--club-raised)] p-1 rounded-xl border border-zinc-800 text-xs shrink-0">
               <button
                 onClick={() => setActiveView("enrolled")}
                 className={`px-3 py-1.5 rounded-lg font-semibold transition ${
@@ -424,7 +424,7 @@ export default function AttendanceManager({
           {/* СУРАГЧДЫН ИРЦ АВАХ БОДИТ ЖАГСААЛТ (One-Tap Attendance Rows) */}
           <div className="space-y-2">
             {displayList.length === 0 ? (
-              <div className="text-center py-8 text-zinc-500 text-xs bg-[#18181c] rounded-2xl border border-zinc-800/80">
+              <div className="text-center py-8 text-zinc-500 text-xs bg-[var(--club-raised)] rounded-2xl border border-zinc-800/80">
                 Сурагч олдсонгүй. «Бүх сурагчид» табыг сонгож эсвэл «Шинэ
                 гишүүн» нэмнэ үү.
               </div>
@@ -453,7 +453,7 @@ export default function AttendanceManager({
                     className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 group select-none ${
                       isAttended
                         ? "bg-emerald-950/20 border-emerald-500/50 hover:bg-emerald-950/30"
-                        : "bg-[#18181c] border-zinc-800/80 hover:border-zinc-700"
+                        : "bg-[var(--club-raised)] border-zinc-800/80 hover:border-zinc-700"
                     }`}
                   >
                     {/* Зүүн тал: Сурагчийн мэдээлэл */}
@@ -548,7 +548,7 @@ export default function AttendanceManager({
       )}
 
       {/* 4. СҮҮЛД БҮРТГЭГДСЭН ИРЦИЙН ЖАГСААЛТ (History Feed) */}
-      <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-4">
+      <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl p-4">
         <h4 className="text-xs font-bold text-zinc-300 mb-3 flex items-center gap-1.5">
           <Clock size={14} className="text-red-500" /> {selectedDate} өдрийн
           бүртгэгдсэн ирцийн бүртгэл
@@ -562,7 +562,7 @@ export default function AttendanceManager({
             dayAttendances.map((att) => (
               <div
                 key={att.id}
-                className="flex justify-between items-center text-xs py-2 px-3 bg-[#18181c] rounded-xl border border-zinc-800/60"
+                className="flex justify-between items-center text-xs py-2 px-3 bg-[var(--club-raised)] rounded-xl border border-zinc-800/60"
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />

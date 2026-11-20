@@ -27,7 +27,7 @@ export default function RegistrationLink() {
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-[#121215] p-3">
+    <div className="rounded-2xl border border-zinc-800 bg-[var(--club-panel)] p-3">
       <button type="button" onClick={openLink} aria-expanded={isOpen} aria-controls="registration-link-panel" className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-500/20">
         <LinkIcon size={17} /> Супер линк
       </button>

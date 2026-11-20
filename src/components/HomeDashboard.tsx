@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import AddMemberModal from "@/components/AddMemberModal";
 import RegistrationLink from "@/components/RegistrationLink";
 import TeacherControls from "@/components/TeacherControls";
+import AppearanceControl from "@/components/AppearanceControl";
 import NotificationsModal from "@/components/NotificationsModal";
 import SettingsModal from "@/components/SettingsModal";
 import MemberDetailModal from "@/components/MemberDetailModal";
@@ -159,10 +160,10 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
   const unpaidCount = members.length - paidCount;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-[var(--club-background)] text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white pb-24">
       
       {/* --- TOP HEADER --- */}
-      <header className="sticky top-0 z-40 bg-[#0c0c0e]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-[var(--club-background)]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -177,12 +178,13 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
           </div>
 
           <div className="flex shrink-0 items-center gap-0 sm:gap-2">
+            <AppearanceControl />
             {canManageFinance && <TeacherControls action="invite" compact />}
             <TeacherControls action="logout" />
             <button
               onClick={fetchAllData}
               title="Шинэчлэх"
-              className="p-2.5 rounded-2xl bg-[#141416] border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition"
+              className="p-2.5 rounded-2xl bg-[var(--club-panel)] border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition"
             >
               <RefreshCw size={17} className={loading ? "animate-spin text-red-500" : ""} />
             </button>
@@ -206,21 +208,21 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
         
         {/* Картууд: Статистик */}
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-[#121215] border border-zinc-800/90 rounded-2xl p-3 flex flex-col justify-between">
+          <div className="bg-[var(--club-panel)] border border-zinc-800/90 rounded-2xl p-3 flex flex-col justify-between">
             <span className="text-[11px] font-medium text-zinc-400">Нийт сурагч</span>
             <div className="flex items-baseline gap-1 mt-1">
               <span className="text-xl sm:text-2xl font-black text-white">{members.length}</span>
               <span className="text-[10px] text-zinc-500">хүн</span>
             </div>
           </div>
-          <div className="bg-[#121215] border border-emerald-950/40 rounded-2xl p-3 flex flex-col justify-between">
+          <div className="bg-[var(--club-panel)] border border-emerald-950/40 rounded-2xl p-3 flex flex-col justify-between">
             <span className="text-[11px] font-medium text-emerald-400/80">Төлсөн</span>
             <div className="flex items-baseline gap-1 mt-1">
               <span className="text-xl sm:text-2xl font-black text-emerald-400">{paidCount}</span>
               <span className="text-[10px] text-emerald-500/60">гишүүн</span>
             </div>
           </div>
-          <div className="bg-[#121215] border border-red-950/40 rounded-2xl p-3 flex flex-col justify-between">
+          <div className="bg-[var(--club-panel)] border border-red-950/40 rounded-2xl p-3 flex flex-col justify-between">
             <span className="text-[11px] font-medium text-red-400/80">Төлөөгүй</span>
             <div className="flex items-baseline gap-1 mt-1">
               <span className="text-xl sm:text-2xl font-black text-red-400">{unpaidCount}</span>
@@ -266,7 +268,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                   placeholder="Овог, нэр эсвэл утсаар хайх..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#121215] border border-zinc-800 rounded-2xl py-2.5 pl-10 pr-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
+                  className="w-full bg-[var(--club-panel)] border border-zinc-800 rounded-2xl py-2.5 pl-10 pr-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
                 />
               </div>
               
@@ -285,7 +287,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
               <button
                 onClick={() => setFilterPayment("all")}
                 className={`px-3 py-1.5 rounded-xl border transition shrink-0 ${
-                  filterPayment === "all" ? "bg-zinc-800 border-zinc-600 text-white font-bold" : "bg-[#121215] border-zinc-800 text-zinc-400"
+                  filterPayment === "all" ? "bg-zinc-800 border-zinc-600 text-white font-bold" : "bg-[var(--club-panel)] border-zinc-800 text-zinc-400"
                 }`}
               >
                 Бүгд ({members.length})
@@ -293,7 +295,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
               <button
                 onClick={() => setFilterPayment("paid")}
                 className={`px-3 py-1.5 rounded-xl border transition shrink-0 ${
-                  filterPayment === "paid" ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 font-bold" : "bg-[#121215] border-zinc-800 text-zinc-400"
+                  filterPayment === "paid" ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 font-bold" : "bg-[var(--club-panel)] border-zinc-800 text-zinc-400"
                 }`}
               >
                 Төлсөн ({paidCount})
@@ -301,7 +303,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
               <button
                 onClick={() => setFilterPayment("unpaid")}
                 className={`px-3 py-1.5 rounded-xl border transition shrink-0 ${
-                  filterPayment === "unpaid" ? "bg-red-500/20 border-red-500 text-red-400 font-bold" : "bg-[#121215] border-zinc-800 text-zinc-400"
+                  filterPayment === "unpaid" ? "bg-red-500/20 border-red-500 text-red-400 font-bold" : "bg-[var(--club-panel)] border-zinc-800 text-zinc-400"
                 }`}
               >
                 Төлөөгүй ({unpaidCount})
@@ -310,7 +312,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
               <select
                 value={filterLevel}
                 onChange={(e) => setFilterLevel(e.target.value)}
-                className="bg-[#121215] border border-zinc-800 rounded-xl px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-red-500 shrink-0"
+                className="bg-[var(--club-panel)] border border-zinc-800 rounded-xl px-2.5 py-1 text-xs text-zinc-300 focus:outline-none focus:border-red-500 shrink-0"
               >
                 <option value="all">Бүх түвшин</option>
                 <option value="Beginner">Beginner</option>
@@ -323,7 +325,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
             {/* Гишүүдийн жагсаалт */}
             <div className="space-y-2">
               {filteredMembers.length === 0 ? (
-                <div className="text-center py-12 bg-[#121215] rounded-3xl border border-zinc-800/80 text-zinc-500 text-xs">
+                <div className="text-center py-12 bg-[var(--club-panel)] rounded-3xl border border-zinc-800/80 text-zinc-500 text-xs">
                   Сурагч олдсонгүй. Дээрх <b className="text-red-500">+ Шинэ гишүүн</b> товчоор шинээр нэмнэ үү.
                 </div>
               ) : (
@@ -338,7 +340,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                   return (
                     <div
                       key={m.id}
-                      className="bg-[#121215] hover:bg-[#16161a] transition border border-zinc-800/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 group"
+                      className="bg-[var(--club-panel)] hover:bg-[#16161a] transition border border-zinc-800/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 group"
                     >
                       <div 
                         onClick={() => setSelectedMember(m)}
@@ -438,7 +440,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
       </main>
 
       {/* --- МОБАЙЛ BOTTOM NAVIGATION BAR --- */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0c0c0e]/95 backdrop-blur-lg border-t border-zinc-800/80 py-2.5 px-4 sm:px-6">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--club-background)]/95 backdrop-blur-lg border-t border-zinc-800/80 py-2.5 px-4 sm:px-6">
         <div className="max-w-md mx-auto flex justify-around items-center">
           <button
             onClick={() => setActiveTab("schedule")}

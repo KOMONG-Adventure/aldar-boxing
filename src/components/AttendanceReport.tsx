@@ -27,7 +27,7 @@ export default function AttendanceReport({ date, attendances }: {
   const students = [...counts.entries()].sort(([, a], [, b]) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <details className="rounded-2xl border border-zinc-800 bg-[#121215]">
+    <details className="rounded-2xl border border-zinc-800 bg-[var(--club-panel)]">
       <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-white">
         <ClipboardList size={17} className="mr-2 inline text-red-500" />
         Ирцийн тайлан

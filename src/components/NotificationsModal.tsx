@@ -34,7 +34,7 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Мэдэгдэл"
-        className="relative p-2.5 rounded-2xl bg-[#141416] border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
+        className="relative p-2.5 rounded-2xl bg-[var(--club-panel)] border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -77,7 +77,7 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
                     className={`p-3 rounded-2xl border transition flex items-start gap-2.5 ${
                       !n.read 
                         ? 'bg-[#1e1e23] border-zinc-700/80 text-white' 
-                        : 'bg-[#121215] border-zinc-800/60 text-zinc-400'
+                        : 'bg-[var(--club-panel)] border-zinc-800/60 text-zinc-400'
                     }`}
                   >
                     <div className="mt-0.5">

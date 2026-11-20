@@ -72,21 +72,21 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
     <div className="space-y-4">
       {/* Нийт санхүүгийн картууд */}
       <div className="grid grid-cols-3 gap-2.5">
-        <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-3.5">
+        <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-2xl p-3.5">
           <span className="text-[11px] text-zinc-400 block mb-1">Нийт орлого</span>
           <span className="text-base sm:text-lg font-black text-emerald-400">
             +{totalIncome.toLocaleString()}₮
           </span>
         </div>
 
-        <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-3.5">
+        <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-2xl p-3.5">
           <span className="text-[11px] text-zinc-400 block mb-1">Нийт зардал</span>
           <span className="text-base sm:text-lg font-black text-red-400">
             -{totalExpense.toLocaleString()}₮
           </span>
         </div>
 
-        <div className="bg-[#121215] border border-zinc-800 rounded-2xl p-3.5">
+        <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-2xl p-3.5">
           <span className="text-[11px] text-zinc-400 block mb-1">Цэвэр ашиг</span>
           <span className={`text-base sm:text-lg font-black ${netBalance >= 0 ? "text-emerald-400" : "text-red-400"}`}>
             {netBalance.toLocaleString()}₮
@@ -95,7 +95,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
       </div>
 
       {/* Үйлдлийн толгой */}
-      <div className="flex justify-between items-center bg-[#121215] border border-zinc-800 rounded-2xl p-4">
+      <div className="flex justify-between items-center bg-[var(--club-panel)] border border-zinc-800 rounded-2xl p-4">
         <div>
           <h4 className="text-sm font-bold text-white flex items-center gap-2">
             <DollarSign size={16} className="text-emerald-400" /> Клубын касс & Санхүүгийн бүртгэл
@@ -118,7 +118,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
           financials.map((f) => (
             <div
               key={f.id}
-              className="bg-[#121215] border border-zinc-800 rounded-2xl p-3.5 flex justify-between items-center"
+              className="bg-[var(--club-panel)] border border-zinc-800 rounded-2xl p-3.5 flex justify-between items-center"
             >
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-xl ${
@@ -146,7 +146,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
       {/* Шинэ гүйлгээний Modal */}
       {isOpenModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div role="dialog" aria-modal="true" aria-label="Санхүүгийн гүйлгээ" className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md max-h-[90dvh] overflow-y-auto p-6 text-white shadow-2xl relative">
+          <div role="dialog" aria-modal="true" aria-label="Санхүүгийн гүйлгээ" className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl w-full max-w-md max-h-[90dvh] overflow-y-auto p-6 text-white shadow-2xl relative">
             <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
               <h3 className="text-base font-bold">Гүйлгээ бүртгэх</h3>
               <button onClick={() => setIsOpenModal(false)} aria-label="Гүйлгээний цонх хаах" className="text-zinc-400 hover:text-white p-1">

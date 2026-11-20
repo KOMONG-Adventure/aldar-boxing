@@ -1,6 +1,90 @@
 @import "tailwindcss";
 
 :root {
+  --club-background: #09090b;
+  --club-panel: #121215;
+  --club-raised: #18181c;
+}
+:root[data-surface="slate"] {
+  --club-background: #0d1422;
+  --club-panel: #151f30;
+  --club-raised: #1b2840;
+  --color-zinc-800: #2a3951;
+}
+:root[data-surface="warm"] {
+  --club-background: #171310;
+  --club-panel: #211b16;
+  --club-raised: #2a221c;
+  --color-zinc-800: #3c3028;
+}
+:root[data-accent="blue"] {
+  --color-red-300: #bfdbfe;
+  --color-rose-300: #bfdbfe;
+  --color-red-400: #93c5fd;
+  --color-rose-400: #93c5fd;
+  --color-red-500: #60a5fa;
+  --color-rose-500: #60a5fa;
+  --color-red-600: #2563eb;
+  --color-rose-600: #2563eb;
+  --color-red-700: #1d4ed8;
+  --color-rose-700: #1d4ed8;
+  --color-red-950: #172554;
+  --color-rose-950: #172554;
+}
+:root[data-accent="green"] {
+  --color-red-300: #a7f3d0;
+  --color-rose-300: #a7f3d0;
+  --color-red-400: #6ee7b7;
+  --color-rose-400: #6ee7b7;
+  --color-red-500: #34d399;
+  --color-rose-500: #34d399;
+  --color-red-600: #047857;
+  --color-rose-600: #047857;
+  --color-red-700: #065f46;
+  --color-rose-700: #065f46;
+  --color-red-950: #022c22;
+  --color-rose-950: #022c22;
+}
+:root[data-accent="purple"] {
+  --color-red-300: #ddd6fe;
+  --color-rose-300: #ddd6fe;
+  --color-red-400: #c4b5fd;
+  --color-rose-400: #c4b5fd;
+  --color-red-500: #a78bfa;
+  --color-rose-500: #a78bfa;
+  --color-red-600: #7c3aed;
+  --color-rose-600: #7c3aed;
+  --color-red-700: #6d28d9;
+  --color-rose-700: #6d28d9;
+  --color-red-950: #2e1065;
+  --color-rose-950: #2e1065;
+}
+
+.appearance-option {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 44px;
+  border: 1px solid var(--color-zinc-700);
+  border-radius: .75rem;
+  padding: .55rem .75rem;
+  font-size: .875rem;
+  text-align: left;
+  cursor: pointer;
+}
+.appearance-option[aria-pressed="true"] {
+  border-color: var(--color-red-400);
+  background: color-mix(in srgb, var(--color-red-500) 12%, transparent);
+}
+.appearance-option span {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: none;
+  border: 1px solid #ffffff40;
+  border-radius: 50%;
+}
+
+:root {
   --background: #ffffff;
   --foreground: #171717;
 }

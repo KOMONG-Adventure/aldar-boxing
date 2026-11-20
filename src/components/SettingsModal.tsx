@@ -46,7 +46,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
           setIsOpen(true);
         }}
         aria-label="Тохиргоо"
-        className="p-2.5 rounded-2xl bg-[#141416] border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
+        className="p-2.5 rounded-2xl bg-[var(--club-panel)] border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
       >
         <Settings size={18} />
       </button>
@@ -54,7 +54,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
       {/* Попап */}
       {isOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div role="dialog" aria-modal="true" aria-label="Клубын тохиргоо" className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-md max-h-[90dvh] overflow-y-auto text-white shadow-2xl p-6 relative">
+          <div role="dialog" aria-modal="true" aria-label="Клубын тохиргоо" className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl w-full max-w-md max-h-[90dvh] overflow-y-auto text-white shadow-2xl p-6 relative">
             <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-red-600/20 text-red-500 rounded-xl">
@@ -129,7 +129,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-[#18181c] rounded-2xl border border-zinc-800">
+              <div className="flex items-center justify-between p-3 bg-[var(--club-raised)] rounded-2xl border border-zinc-800">
                 <div className="flex items-center gap-2">
                   <BellRing size={16} className="text-red-500" />
                   <div>

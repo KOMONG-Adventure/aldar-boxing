@@ -239,7 +239,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
-      <div className="bg-[#141416] border border-zinc-800 rounded-3xl w-full max-w-lg text-white shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
+      <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl w-full max-w-lg text-white shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Толгой хэсэг */}
         <div className="flex justify-between items-center gap-3 px-4 sm:px-6 py-4 border-b border-zinc-800 shrink-0 bg-[#17171a]">
@@ -294,7 +294,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
         </div>
 
         {/* Табууд: Хувийн бүртгэл | Төлбөрийн түүх | Рекорд | QR Үнэмлэх */}
-        <div className="relative bg-[#121215] shrink-0">
+        <div className="relative bg-[var(--club-panel)] shrink-0">
           <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
             {[
               { key: "profile", label: "Хувийн бүртгэл", icon: null },
@@ -333,7 +333,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
             <div className="space-y-4">
               
               {/* Одоогийн төлөв ба Шинэ төлбөр авах товч */}
-              <div className="bg-[#19191d] border border-zinc-800 rounded-3xl p-4 flex justify-between items-center shadow-lg">
+              <div className="bg-[var(--club-raised)] border border-zinc-800 rounded-3xl p-4 flex justify-between items-center shadow-lg">
                 <div>
                   <span className="text-[11px] text-zinc-400 block mb-0.5">Одоогийн статус:</span>
                   <div className="flex items-center gap-2">
@@ -368,7 +368,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
 
               {/* ШИНЭ ТӨЛБӨР БҮРТГЭХ ФОРМ */}
               {showAddPayment && (
-                <form onSubmit={handleCreatePaymentRecord} className="bg-[#19191d] border border-red-500/30 rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-xl animate-in fade-in">
+                <form onSubmit={handleCreatePaymentRecord} className="bg-[var(--club-raised)] border border-red-500/30 rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-xl animate-in fade-in">
                   <div className="flex justify-between items-center pb-2 border-b border-zinc-800">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
                       <Receipt size={15} className="text-red-400" /> Шинэ төлбөр бүртгэх
@@ -492,7 +492,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                 </h4>
 
                 {paymentHistory.length === 0 ? (
-                  <div className="text-center py-8 bg-[#19191d] rounded-2xl border border-zinc-800 text-zinc-500 text-xs">
+                  <div className="text-center py-8 bg-[var(--club-raised)] rounded-2xl border border-zinc-800 text-zinc-500 text-xs">
                     Одоогоор төлбөрийн түүх бүртгэгдээгүй байна. Дээрх «Төлбөр авах» товчоор нэмнэ үү.
                   </div>
                 ) : (
@@ -501,7 +501,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                     return (
                       <div
                         key={p.id || idx}
-                        className={`bg-[#19191d] border rounded-2xl p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        className={`bg-[var(--club-raised)] border rounded-2xl p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                           isCurrent 
                             ? "border-emerald-500/40 bg-gradient-to-r from-emerald-950/20 via-[#19191d] to-[#19191d]"
                             : "border-zinc-800 hover:border-zinc-700"
@@ -565,15 +565,15 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
           {activeTab === "fights" && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-2.5 text-center">
-                <div className="bg-[#18181c] border border-emerald-900/30 p-3 rounded-2xl">
+                <div className="bg-[var(--club-raised)] border border-emerald-900/30 p-3 rounded-2xl">
                   <span className="text-[10px] text-zinc-400 block">Ялалт (Win)</span>
                   <span className="text-xl font-black text-emerald-400">{wins}</span>
                 </div>
-                <div className="bg-[#18181c] border border-red-900/30 p-3 rounded-2xl">
+                <div className="bg-[var(--club-raised)] border border-red-900/30 p-3 rounded-2xl">
                   <span className="text-[10px] text-zinc-400 block">Ялагдал (Loss)</span>
                   <span className="text-xl font-black text-red-400">{losses}</span>
                 </div>
-                <div className="bg-[#18181c] border border-zinc-800 p-3 rounded-2xl">
+                <div className="bg-[var(--club-raised)] border border-zinc-800 p-3 rounded-2xl">
                   <span className="text-[10px] text-zinc-400 block">Тэнцээ (Draw)</span>
                   <span className="text-xl font-black text-zinc-300">{draws}</span>
                 </div>
@@ -592,7 +592,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
               </div>
 
               {showAddFight && (
-                <form onSubmit={handleAddFight} className="bg-[#18181c] border border-zinc-800 p-3.5 rounded-2xl space-y-3">
+                <form onSubmit={handleAddFight} className="bg-[var(--club-raised)] border border-zinc-800 p-3.5 rounded-2xl space-y-3">
                   <fieldset disabled={fightSubmitting} className="space-y-3">
                   <div>
                     <label className="text-[11px] text-zinc-300 block mb-1">Өрсөлдөгчийн нэр *</label>
@@ -602,7 +602,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       placeholder="Жишээ: Д. Төмөр (Шонхор клуб)"
                       value={fightForm.opponent}
                       onChange={(e) => setFightForm({ ...fightForm, opponent: e.target.value })}
-                      className="w-full bg-[#121215] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                      className="w-full bg-[var(--club-panel)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                     />
                   </div>
 
@@ -612,7 +612,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       <select
                         value={fightForm.result}
                         onChange={(e) => setFightForm({ ...fightForm, result: e.target.value as FightRecord["result"] })}
-                        className="w-full bg-[#121215] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500"
+                        className="w-full bg-[var(--club-panel)] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500"
                       >
                         <option value="WIN">🏆 Ялалт (WIN)</option>
                         <option value="LOSS">❌ Ялагдал (LOSS)</option>
@@ -626,7 +626,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         placeholder="KO, TKO, Оноогоор"
                         value={fightForm.method}
                         onChange={(e) => setFightForm({ ...fightForm, method: e.target.value })}
-                        className="w-full bg-[#121215] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                        className="w-full bg-[var(--club-panel)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                       />
                     </div>
                   </div>
@@ -638,7 +638,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         type="text"
                         value={fightForm.tournament}
                         onChange={(e) => setFightForm({ ...fightForm, tournament: e.target.value })}
-                        className="w-full bg-[#121215] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                        className="w-full bg-[var(--club-panel)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                       />
                     </div>
                     <div>
@@ -647,7 +647,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         type="date"
                         value={fightForm.date}
                         onChange={(e) => setFightForm({ ...fightForm, date: e.target.value })}
-                        className="w-full bg-[#121215] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                        className="w-full bg-[var(--club-panel)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                       />
                     </div>
                   </div>
@@ -667,7 +667,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                   <p className="text-zinc-500 text-center py-6">Одоогоор тулааны рекорд бүртгэгдээгүй байна</p>
                 ) : (
                   fights.map((f) => (
-                    <div key={f.id} className="bg-[#18181c] border border-zinc-800 p-3 rounded-2xl flex justify-between items-center">
+                    <div key={f.id} className="bg-[var(--club-raised)] border border-zinc-800 p-3 rounded-2xl flex justify-between items-center">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
@@ -766,7 +766,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
           {activeTab === "profile" && (
             <>
               {/* Төлбөрийн хяналт товч карт */}
-              <div className="bg-[#19191d] border border-zinc-800 rounded-2xl p-4 flex justify-between items-center shadow-lg">
+              <div className="bg-[var(--club-raised)] border border-zinc-800 rounded-2xl p-4 flex justify-between items-center shadow-lg">
                 <div>
                   <span className="text-[11px] text-zinc-400 block mb-0.5">Одоогийн төлбөрийн статус:</span>
                   <div className="flex items-center gap-2">
@@ -792,7 +792,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
 
               {/* МЭДЭЭЛЭЛ ЗАСАХ РЕЖИМ (EDIT FORM) */}
               {isEditing ? (
-                <div className="bg-[#19191d] border border-amber-500/30 rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-lg animate-in fade-in">
+                <div className="bg-[var(--club-raised)] border border-amber-500/30 rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-lg animate-in fade-in">
                   <div className="flex justify-between items-center pb-2 border-b border-zinc-800">
                     <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
                       <Edit3 size={14} /> Сурагчийн мэдээллийг засах
@@ -954,26 +954,26 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       </button>
                     </h4>
                     <div className="grid grid-cols-3 gap-2.5">
-                      <div className="bg-[#19191d] border border-zinc-800/80 p-2.5 rounded-2xl text-center">
+                      <div className="bg-[var(--club-raised)] border border-zinc-800/80 p-2.5 rounded-2xl text-center">
                         <span className="text-[10px] text-zinc-400 block">Жин</span>
                         <span className="text-sm font-bold text-white">{editForm.weight ? `${editForm.weight} кг` : "-"}</span>
                       </div>
-                      <div className="bg-[#19191d] border border-zinc-800/80 p-2.5 rounded-2xl text-center">
+                      <div className="bg-[var(--club-raised)] border border-zinc-800/80 p-2.5 rounded-2xl text-center">
                         <span className="text-[10px] text-zinc-400 block">Өндөр</span>
                         <span className="text-sm font-bold text-white">{editForm.height ? `${editForm.height} см` : "-"}</span>
                       </div>
-                      <div className="bg-[#19191d] border border-zinc-800/80 p-2.5 rounded-2xl text-center">
+                      <div className="bg-[var(--club-raised)] border border-zinc-800/80 p-2.5 rounded-2xl text-center">
                         <span className="text-[10px] text-zinc-400 block">Цусны бүлэг</span>
                         <span className="text-sm font-bold text-white">{editForm.bloodType || "-"}</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5 mt-2.5">
-                      <div className="bg-[#19191d] border border-zinc-800/80 p-2.5 rounded-2xl">
+                      <div className="bg-[var(--club-raised)] border border-zinc-800/80 p-2.5 rounded-2xl">
                         <span className="text-[10px] text-zinc-400 block">Регистрийн дугаар</span>
                         <span className="text-xs font-semibold text-white">{editForm.registerNumber || "Бүртгэлгүй"}</span>
                       </div>
-                      <div className="bg-[#19191d] border border-zinc-800/80 p-2.5 rounded-2xl">
+                      <div className="bg-[var(--club-raised)] border border-zinc-800/80 p-2.5 rounded-2xl">
                         <span className="text-[10px] text-zinc-400 block">Хүйс / Төрсөн өдөр</span>
                         <span className="text-xs font-semibold text-white">
                           {editForm.gender} {editForm.birthDate ? `• ${editForm.birthDate}` : ""}
@@ -987,7 +987,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                     <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                       <MapPin size={14} className="text-red-500" /> Оршин суугаа хаяг
                     </h4>
-                    <div className="bg-[#19191d] border border-zinc-800/80 p-3 rounded-2xl">
+                    <div className="bg-[var(--club-raised)] border border-zinc-800/80 p-3 rounded-2xl">
                       <p className="font-semibold text-white">{editForm.district || "Дүүрэг сонгоогүй"}</p>
                       <p className="text-zinc-400 text-[11px] mt-0.5">{editForm.addressDetail || "Дэлгэрэнгүй хаяг оруулаагүй"}</p>
                     </div>
@@ -1003,7 +1003,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                     ) : (
                       <div className="space-y-2">
                         {member.guardians.map((g, idx) => (
-                          <div key={idx} className="bg-[#19191d] border border-zinc-800/80 p-3 rounded-2xl flex justify-between items-center">
+                          <div key={idx} className="bg-[var(--club-raised)] border border-zinc-800/80 p-3 rounded-2xl flex justify-between items-center">
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-white">{g.name}</span>
@@ -1030,7 +1030,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
               )}
 
               {/* Өөрчлөлтийг хадгалах товч */}
-              <div className="pt-2 sticky bottom-0 bg-[#141416]/95 pb-1 backdrop-blur-md">
+              <div className="pt-2 sticky bottom-0 bg-[var(--club-panel)]/95 pb-1 backdrop-blur-md">
                 <button
                   type="button"
                   onClick={handleSaveMember}
@@ -1050,7 +1050,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
         ref={photoDialogRef}
         aria-labelledby="member-photo-title"
         onClick={event => { if (event.target === event.currentTarget) event.currentTarget.close(); }}
-        className="fixed inset-0 m-auto w-[calc(100%_-_1.5rem)] max-w-3xl max-h-[92dvh] rounded-2xl border border-zinc-700 bg-[#141416] p-0 text-white shadow-2xl backdrop:bg-black/90 backdrop:backdrop-blur-sm"
+        className="fixed inset-0 m-auto w-[calc(100%_-_1.5rem)] max-w-3xl max-h-[92dvh] rounded-2xl border border-zinc-700 bg-[var(--club-panel)] p-0 text-white shadow-2xl backdrop:bg-black/90 backdrop:backdrop-blur-sm"
       >
         <div className="p-3 sm:p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
