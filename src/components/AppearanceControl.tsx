@@ -44,6 +44,21 @@ const memberCards = [
   { id: "profile", label: "Том зураг" },
   { id: "stacked", label: "Давхар мөр" },
 ];
+const memberFields = [
+  { id: "class", label: "Анги", example: "Өсвөрийн анги" },
+  { id: "joined", label: "Элссэн огноо", example: "2026-11-21" },
+  { id: "weight", label: "Жин", example: "58 кг" },
+  { id: "height", label: "Өндөр", example: "168 см" },
+];
+
+function applyMemberFields(fields: string[]) {
+  document.documentElement.dataset.memberFields = fields.join(" ");
+  try {
+    localStorage.setItem("aldar-member-card-fields", JSON.stringify(fields));
+  } catch {
+    // The current page still reflects the selection.
+  }
+}
 
 function applyAppearance(accent: string, background: string, card: string, registration: string, memberCard = document.documentElement.dataset.memberCard || "classic") {
   document.documentElement.dataset.accent = accent;
@@ -60,6 +75,14 @@ function applyAppearance(accent: string, background: string, card: string, regis
 
 export function RestoreAppearance() {
   useEffect(() => {
+    try {
+      const savedFields = JSON.parse(localStorage.getItem("aldar-member-card-fields") || "[]");
+      if (Array.isArray(savedFields)) {
+        applyMemberFields(memberFields.filter(item => savedFields.includes(item.id)).map(item => item.id));
+      }
+    } catch {
+      applyMemberFields([]);
+    }
     try {
       const saved = JSON.parse(localStorage.getItem("aldar-appearance") || "{}");
       applyAppearance(
@@ -83,6 +106,7 @@ export default function AppearanceControl() {
   const [card, setCard] = useState("classic");
   const [registration, setRegistration] = useState("classic");
   const [memberCard, setMemberCard] = useState("classic");
+  const [fields, setFields] = useState<string[]>([]);
 
   return <>
     <button type="button" aria-label="Харагдац тохируулах" title="Харагдац тохируулах"
@@ -93,6 +117,7 @@ export default function AppearanceControl() {
         setCard(document.documentElement.dataset.card || "classic");
         setRegistration(document.documentElement.dataset.registration || "classic");
         setMemberCard(document.documentElement.dataset.memberCard || "classic");
+        setFields((document.documentElement.dataset.memberFields || "").split(" ").filter(Boolean));
         panel.current?.showModal();
       }}>
       <Palette size={18} />
@@ -109,6 +134,20 @@ export default function AppearanceControl() {
             <i aria-hidden="true" data-preview={item.id} className="member-card-preview"><b /><em /></i>
             {item.label}
           </button>
+        )}</div>
+      </fieldset>
+      <fieldset className="mb-5">
+        <legend className="mb-2 text-sm text-zinc-300">Жагсаалтын карт дээр харуулах мэдээлэл</legend>
+        <div className="grid grid-cols-2 gap-2">{memberFields.map(item =>
+          <label key={item.id} className="flex cursor-pointer items-start gap-2 rounded-xl border border-zinc-700 p-2.5 text-xs">
+            <input type="checkbox" className="mt-0.5 accent-red-600" checked={fields.includes(item.id)}
+              onChange={event => {
+                const next = event.target.checked ? [...fields, item.id] : fields.filter(id => id !== item.id);
+                setFields(next);
+                applyMemberFields(next);
+              }} />
+            <span><strong className="block">{item.label}</strong><small className="text-zinc-400">Жишээ: {item.example}</small></span>
+          </label>
         )}</div>
       </fieldset>
       <fieldset className="mb-5">

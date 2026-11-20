@@ -228,9 +228,32 @@
 [data-member-card="profile"] .member-list-card { padding-block: 1rem; }
 [data-member-card="profile"] .member-list-avatar { width: 3.75rem; height: 3.75rem; border-radius: 50%; }
 [data-member-card="stacked"] .member-list-identity { flex-basis: 100%; }
-[data-member-card="stacked"] .member-list-actions {
+.member-list-footer { display: contents; }
+.member-list-details {
+  display: none;
+  flex-wrap: wrap;
+  gap: .3rem .8rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: .75rem;
+}
+.member-list-details > div { display: none; min-width: 0; overflow-wrap: anywhere; }
+[data-member-fields~="class"] [data-member-field="class"],
+[data-member-fields~="joined"] [data-member-field="joined"],
+[data-member-fields~="weight"] [data-member-field="weight"],
+[data-member-fields~="height"] [data-member-field="height"] { display: inline; }
+.member-list-details dt { display: inline; color: var(--color-zinc-400); margin-inline-end: .3rem; }
+.member-list-details dd { display: inline; color: var(--color-zinc-200); font-weight: 600; }
+[data-member-fields~="class"] .member-list-details:has(> [data-member-field="class"]),
+[data-member-fields~="joined"] .member-list-details:has(> [data-member-field="joined"]),
+[data-member-fields~="weight"] .member-list-details:has(> [data-member-field="weight"]),
+[data-member-fields~="height"] .member-list-details:has(> [data-member-field="height"]) { display: flex; }
+[data-member-card="stacked"] .member-list-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
   width: 100%;
-  justify-content: flex-end;
   border-top: 1px solid var(--color-zinc-800);
   padding-top: .625rem;
 }

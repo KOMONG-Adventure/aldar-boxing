@@ -360,6 +360,20 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                         </div>
                       </div>
 
+                      <div className="member-list-footer">
+                        <dl className="member-list-details">
+                          {[
+                            { id: "class", label: "Анги", value: sessions.filter(s => m.assignedSessionIds?.includes(s.id)).map(s => s.title).join(", ") },
+                            { id: "joined", label: "Элссэн", value: m.joinedDate },
+                            { id: "weight", label: "Жин", value: m.weight?.trim() ? `${m.weight} кг` : "" },
+                            { id: "height", label: "Өндөр", value: m.height?.trim() ? `${m.height} см` : "" },
+                          ].filter(field => field.value).map(field => (
+                            <div key={field.id} data-member-field={field.id}>
+                              <dt>{field.label}</dt>
+                              <dd>{field.value}</dd>
+                            </div>
+                          ))}
+                        </dl>
                       <div className="member-list-actions ml-auto flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => { setMemberTab("card"); setSelectedMember(m); }}
@@ -395,6 +409,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                         >
                           <Trash2 size={16} />
                         </button>}
+                      </div>
                       </div>
                     </div>
                   );
