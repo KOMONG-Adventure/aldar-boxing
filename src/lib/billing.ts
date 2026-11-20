@@ -1,6 +1,7 @@
 export const STANDARD_MONTHLY_FEE = 100000;
 export const SIBLING_MONTHLY_FEE = 50000;
 export const PAYMENT_PERIODS = [1, 2, 3, 6] as const;
+export const PAYMENT_WARNING_DAYS = 5;
 
 export function billingToday(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ulaanbaatar" }).format(new Date());
@@ -21,6 +22,6 @@ export function studentPaymentState(student: { status: string; expireDate: strin
   }
   const daysLeft = Math.round((Date.parse(`${student.expireDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000);
   if (daysLeft < 0) return { kind: "expired" as const, daysLeft };
-  if (daysLeft <= 7) return { kind: "expiring" as const, daysLeft };
+  if (daysLeft <= PAYMENT_WARNING_DAYS) return { kind: "expiring" as const, daysLeft };
   return { kind: "active" as const, daysLeft };
 }

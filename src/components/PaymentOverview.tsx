@@ -10,7 +10,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import type { Member } from "@/lib/db";
-import { billingToday, studentPaymentState } from "@/lib/billing";
+import { billingToday, PAYMENT_WARNING_DAYS, studentPaymentState } from "@/lib/billing";
 
 type Filter = "attention" | "expiring" | "active";
 
@@ -57,7 +57,7 @@ export default function PaymentOverview({
     },
     {
       key: "expiring" as const,
-      label: "7 хоногт дуусах",
+      label: `${PAYMENT_WARNING_DAYS} хоногт дуусах`,
       icon: CalendarClock,
       color: "text-amber-400",
     },

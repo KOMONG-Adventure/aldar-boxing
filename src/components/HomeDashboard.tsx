@@ -13,7 +13,7 @@ import AttendanceManager from "@/components/AttendanceManager";
 import PaymentOverview from "@/components/PaymentOverview";
 import FinanceManager from "@/components/FinanceManager";
 import * as XLSX from "xlsx";
-import { studentPaymentState } from "@/lib/billing";
+import { billingToday, paymentEndDate, studentPaymentState } from "@/lib/billing";
 import { 
   Users, Calendar, CreditCard, Search,
   Trash2, CheckCircle2, AlertCircle, Clock,
@@ -162,7 +162,8 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
     return matchesQuery && matchesLevel && matchesPayment;
   });
 
-  const paidCount = members.filter(m => (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m).kind) : m.status === "PAID")).length;
+  const today = billingToday();
+  const paidCount = members.filter(m => (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m, today).kind) : m.status === "PAID")).length;
   const unpaidCount = members.length - paidCount;
 
   return (
@@ -322,9 +323,13 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                 </div>
               ) : (
                 filteredMembers.map((m) => {
-                  const paymentState = studentPaymentState(m);
+                  const paymentState = studentPaymentState(m, today);
                   const isPaid = canManageFinance ? paymentState.kind === "active" || paymentState.kind === "expiring" : m.status === "PAID";
                   const isExpired = canManageFinance && paymentState.kind === "expired";
+                  const expiring = canManageFinance && paymentState.kind === "expiring";
+                  const lastExpiry = canManageFinance && !isPaid
+                    ? (isExpired ? m.expireDate : m.paymentHistory?.find(payment => payment.expireDate < today && paymentEndDate(payment.expireDate, 0) === payment.expireDate)?.expireDate)
+                    : undefined;
                   const fights = m.fights || [];
                   const wins = fights.filter(f => f.result === "WIN").length;
                   const losses = fights.filter(f => f.result === "LOSS").length;
@@ -394,15 +399,21 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                           <QrCode size={15} />
                         </button>
 
+                        <div className="flex flex-col items-end gap-1">
                         <button
                           disabled={!canManageFinance}
+                          onClick={() => { setMemberTab("payments"); setSelectedMember(m); }}
                           className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition flex items-center gap-1 ${
-                            isPaid && !isExpired
+                            expiring
+                              ? "bg-amber-500/15 border-amber-500/40 text-amber-400"
+                              : isPaid && !isExpired
                               ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
                               : "bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25"
                           }`}
                         >
-                          {isPaid && !isExpired ? (
+                          {expiring ? (
+                            <><Clock size={13} /> Дуусаж байна</>
+                          ) : isPaid && !isExpired ? (
                             <>
                               <CheckCircle2 size={13} /> Төлсөн
                             </>
@@ -412,6 +423,13 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                             </>
                           )}
                         </button>
+                        {expiring && (
+                          <span className="text-right text-[10px] text-amber-400">
+                            {paymentState.daysLeft === 0 ? "Өнөөдөр дуусна" : `${paymentState.daysLeft} хоног үлдсэн`} · {m.expireDate}
+                          </span>
+                        )}
+                        {lastExpiry && <span className="text-right text-[10px] text-zinc-400">Дууссан огноо {lastExpiry}</span>}
+                        </div>
                         
                         {canManageFinance && <button
                           onClick={() => handleDeleteMember(m.id, m.name)}
