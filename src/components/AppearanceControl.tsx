@@ -37,14 +37,22 @@ const registrations = [
   { id: "compact", label: "Нягт" },
   { id: "wide", label: "Өргөн" },
 ];
+const memberCards = [
+  { id: "classic", label: "Сонгодог" },
+  { id: "compact", label: "Нягт" },
+  { id: "accent", label: "Өнгөт хүрээ" },
+  { id: "profile", label: "Том зураг" },
+  { id: "stacked", label: "Давхар мөр" },
+];
 
-function applyAppearance(accent: string, background: string, card: string, registration: string) {
+function applyAppearance(accent: string, background: string, card: string, registration: string, memberCard = document.documentElement.dataset.memberCard || "classic") {
   document.documentElement.dataset.accent = accent;
   document.documentElement.dataset.surface = background;
   document.documentElement.dataset.card = card;
   document.documentElement.dataset.registration = registration;
+  document.documentElement.dataset.memberCard = memberCard;
   try {
-    localStorage.setItem("aldar-appearance", JSON.stringify({ accent, background, card, registration }));
+    localStorage.setItem("aldar-appearance", JSON.stringify({ accent, background, card, registration, memberCard }));
   } catch {
     // The current page still reflects the selection when storage is unavailable.
   }
@@ -59,6 +67,7 @@ export function RestoreAppearance() {
         backgrounds.some(item => item.id === saved.background) ? saved.background : "black",
         cards.some(item => item.id === saved.card) ? saved.card : "classic",
         registrations.some(item => item.id === saved.registration) ? saved.registration : "classic",
+        memberCards.some(item => item.id === saved.memberCard) ? saved.memberCard : "classic",
       );
     } catch {
       applyAppearance("red", "black", "classic", "classic");
@@ -73,6 +82,7 @@ export default function AppearanceControl() {
   const [background, setBackground] = useState("black");
   const [card, setCard] = useState("classic");
   const [registration, setRegistration] = useState("classic");
+  const [memberCard, setMemberCard] = useState("classic");
 
   return <>
     <button type="button" aria-label="Харагдац тохируулах" title="Харагдац тохируулах"
@@ -82,6 +92,7 @@ export default function AppearanceControl() {
         setBackground(document.documentElement.dataset.surface || "black");
         setCard(document.documentElement.dataset.card || "classic");
         setRegistration(document.documentElement.dataset.registration || "classic");
+        setMemberCard(document.documentElement.dataset.memberCard || "classic");
         panel.current?.showModal();
       }}>
       <Palette size={18} />
@@ -89,6 +100,17 @@ export default function AppearanceControl() {
     <dialog ref={panel} aria-labelledby="appearance-title"
       className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl border border-zinc-700 bg-[var(--club-panel)] p-5 text-white backdrop:bg-black/75">
       <h2 id="appearance-title" className="mb-5 text-lg font-bold">Харагдац</h2>
+      <fieldset className="mb-5">
+        <legend className="mb-2 text-sm text-zinc-300">Сурагчийн жагсаалтын карт</legend>
+        <div className="grid grid-cols-2 gap-2">{memberCards.map(item =>
+          <button key={item.id} type="button" aria-pressed={memberCard === item.id}
+            className="appearance-option flex-col items-start"
+            onClick={() => { setMemberCard(item.id); applyAppearance(accent, background, card, registration, item.id); }}>
+            <i aria-hidden="true" data-preview={item.id} className="member-card-preview"><b /><em /></i>
+            {item.label}
+          </button>
+        )}</div>
+      </fieldset>
       <fieldset className="mb-5">
         <legend className="mb-2 text-sm text-zinc-300">QR үнэмлэхийн загвар</legend>
         <div className="grid grid-cols-2 gap-2">{cards.map(item =>

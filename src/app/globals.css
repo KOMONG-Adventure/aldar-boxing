@@ -200,6 +200,40 @@
   padding: 7px;
   background: var(--club-raised);
 }
+
+.member-card-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 40px;
+  padding: 5px 7px;
+  border: 1px solid var(--color-zinc-700);
+  border-radius: 7px;
+  background: var(--club-raised);
+}
+.member-card-preview b { flex: none; width: 14px; height: 14px; border-radius: 5px; background: var(--color-red-400); }
+.member-card-preview em { width: 52%; height: 4px; border-radius: 2px; background: var(--color-zinc-400); }
+.member-card-preview[data-preview="compact"] { height: 27px; }
+.member-card-preview[data-preview="accent"] { border-inline-start: 4px solid var(--color-red-500); }
+.member-card-preview[data-preview="profile"] b { width: 23px; height: 23px; border-radius: 50%; }
+.member-card-preview[data-preview="stacked"] { border-bottom: 10px solid var(--color-zinc-800); }
+
+[data-member-card="compact"] .member-list-card { padding-block: .5rem; gap: .5rem; border-radius: .75rem; }
+[data-member-card="compact"] .member-list-avatar { width: 2rem; height: 2rem; border-radius: .5rem; }
+[data-member-card="accent"] .member-list-card {
+  border-inline-start: 4px solid var(--color-red-500);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-red-500) 10%, var(--club-panel)), var(--club-panel) 65%);
+}
+[data-member-card="profile"] .member-list-card { padding-block: 1rem; }
+[data-member-card="profile"] .member-list-avatar { width: 3.75rem; height: 3.75rem; border-radius: 50%; }
+[data-member-card="stacked"] .member-list-identity { flex-basis: 100%; }
+[data-member-card="stacked"] .member-list-actions {
+  width: 100%;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-zinc-800);
+  padding-top: .625rem;
+}
 .card-preview b { width: 55%; height: 3px; background: var(--color-red-400); }
 .card-preview em { width: 16px; height: 16px; background: #fff; border-radius: 2px; }
 .card-preview[data-preview="stripe"] { border-top: 5px solid var(--color-red-500); }

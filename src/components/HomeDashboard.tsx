@@ -321,20 +321,20 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                   return (
                     <div
                       key={m.id}
-                      className="bg-[var(--club-panel)] hover:bg-[var(--club-raised)] transition border border-zinc-800/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 group"
+                      className="member-list-card bg-[var(--club-panel)] hover:bg-[var(--club-raised)] transition border border-zinc-800/80 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 group"
                     >
                       <div 
                         onClick={() => setSelectedMember(m)}
-                        className="flex items-center gap-3 min-w-0 cursor-pointer flex-1"
+                        className="member-list-identity flex items-center gap-3 min-w-0 cursor-pointer flex-1 basis-36"
                       >
                         {m.avatarUrl ? (
                           <img
                             src={m.avatarUrl}
                             alt={m.name}
-                            className="w-11 h-11 rounded-2xl object-cover border border-zinc-700/80 shrink-0 group-hover:border-red-500/60 transition"
+                            className="member-list-avatar w-11 h-11 rounded-2xl object-cover border border-zinc-700/80 shrink-0 group-hover:border-red-500/60 transition"
                           />
                         ) : (
-                          <div className="w-11 h-11 rounded-2xl bg-zinc-800/90 border border-zinc-700/60 flex items-center justify-center font-bold text-white text-sm shrink-0 group-hover:border-red-500/60 transition">
+                          <div className="member-list-avatar w-11 h-11 rounded-2xl bg-zinc-800/90 border border-zinc-700/60 flex items-center justify-center font-bold text-white text-sm shrink-0 group-hover:border-red-500/60 transition">
                             {m.name.substring(0, 2).toUpperCase()}
                           </div>
                         )}
@@ -360,7 +360,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="member-list-actions ml-auto flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => { setMemberTab("card"); setSelectedMember(m); }}
                           className="p-1.5 bg-zinc-800/70 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl border border-zinc-700/50 transition"
