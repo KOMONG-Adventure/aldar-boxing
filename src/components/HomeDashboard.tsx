@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import AddMemberModal from "@/components/AddMemberModal";
 import RegistrationLink from "@/components/RegistrationLink";
 import TeacherControls from "@/components/TeacherControls";
@@ -14,7 +15,7 @@ import FinanceManager from "@/components/FinanceManager";
 import * as XLSX from "xlsx";
 import { studentPaymentState } from "@/lib/billing";
 import { 
-  Users, Calendar, CreditCard, Dumbbell, Search,
+  Users, Calendar, CreditCard, Search,
   Trash2, CheckCircle2, AlertCircle, Clock,
   RefreshCw, ChevronRight, UserCheck,
   FileSpreadsheet, QrCode, DollarSign, Trophy
@@ -167,9 +168,8 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
         <div className="max-w-screen-xl mx-auto flex flex-wrap items-center justify-between gap-y-2">
           
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
-            <div className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center shadow-md shadow-red-600/30">
-              <Dumbbell className="text-white" size={22} />
-            </div>
+            <Image src="/aldar-club-logo.webp" width={44} height={44} alt="" unoptimized
+              className="h-11 w-11 shrink-0 rounded-xl bg-white object-contain" />
             <div className="min-w-0">
               <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-white">
                 {settings.clubName}
