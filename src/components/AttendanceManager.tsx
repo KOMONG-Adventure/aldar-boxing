@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  Calendar as CalendarIcon,
   Clock,
   Users,
   UserCheck,
@@ -24,6 +23,7 @@ import {
 import { SessionItem, Member, AttendanceRecord, AttendanceStatus } from "@/lib/db";
 import AddSessionModal from "./AddSessionModal";
 import AttendanceReport from "./AttendanceReport";
+import AttendanceDatePicker from "./AttendanceDatePicker";
 import { billingToday } from "@/lib/billing";
 import { scheduleSummary, sessionSlots, slotsOnDate } from "@/lib/schedules";
 
@@ -47,6 +47,8 @@ export default function AttendanceManager({
   // Огноо
   const [selectedDate, setSelectedDate] = useState<string>(billingToday);
   const todayStr = billingToday();
+  const palette = ["#a78bfa", "#38bdf8", "#34d399", "#fbbf24", "#fb7185", "#fb923c", "#818cf8", "#2dd4bf"];
+  const classColors = new Map(sessions.map((session, index) => [session.id, palette[index % palette.length]]));
   const [showAllSessions, setShowAllSessions] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [searchMember, setSearchMember] = useState("");
@@ -166,15 +168,15 @@ export default function AttendanceManager({
         </button>
 
         <div className="flex items-center gap-2 text-center">
-          <CalendarIcon size={18} className="text-red-500" />
-          <input
-            type="date"
+          <AttendanceDatePicker
             value={selectedDate}
-            onChange={(e) => {
-              setSelectedDate(e.target.value);
+            today={todayStr}
+            sessions={sessions}
+            colors={classColors}
+            onChange={(date) => {
+              setSelectedDate(date);
               setShowAllSessions(false);
             }}
-            className="bg-transparent text-white font-bold text-sm sm:text-base cursor-pointer focus:outline-none border-b border-transparent hover:border-zinc-700"
           />
           {isToday && (
             <span className="text-[10px] bg-red-600/20 text-red-400 font-bold px-2 py-0.5 rounded-full border border-red-500/30">
@@ -242,6 +244,7 @@ export default function AttendanceManager({
               return (
                 <div
                   key={s.id}
+                  style={{ borderInlineStart: `4px solid ${classColors.get(s.id)}` }}
                   onClick={() => { setSearchMember(""); setAttendanceError(""); setSelectedSessionId(isSelected ? "" : s.id); }}
                   className={`p-3.5 rounded-2xl border cursor-pointer transition-all relative ${
                     isSelected
@@ -251,6 +254,7 @@ export default function AttendanceManager({
                 >
                   <div className="flex justify-between items-start">
                     <button type="button" aria-expanded={isSelected && currentSlots.length > 0} className="text-left text-xs font-bold text-white truncate max-w-[150px]">
+                      <span aria-hidden="true" className="mr-1.5 inline-block size-2 rounded-full" style={{ backgroundColor: classColors.get(s.id) }} />
                       {s.title}
                     </button>
                     <div className="flex shrink-0 items-center">
