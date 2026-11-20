@@ -3,6 +3,24 @@
 import { useRef, useState } from "react";
 import { ImagePlus, LoaderCircle } from "lucide-react";
 
+export const receiptImageTypes = "image/png,image/jpeg,image/webp";
+
+export function validateReceiptImage(file: File) {
+  if (!receiptImageTypes.split(",").includes(file.type)) throw new Error("PNG, JPG эсвэл WebP зураг сонгоно уу.");
+  if (file.size === 0 || file.size > 4 * 1024 * 1024) throw new Error("4 МБ хүртэлх зураг сонгоно уу.");
+}
+
+export async function uploadPaymentReceipt(endpoint: string, file: File) {
+  validateReceiptImage(file);
+  const body = new FormData();
+  body.append("receipt", file);
+  const response = await fetch(endpoint, { method: "POST", body });
+  if (!response.ok) {
+    const result = await response.json().catch(() => null);
+    throw new Error(result?.error || "Баримт хадгалах боломжгүй байна.");
+  }
+}
+
 export default function PaymentReceipt({ paymentId, hasReceipt }: { paymentId: string; hasReceipt?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(false);
@@ -13,19 +31,9 @@ export default function PaymentReceipt({ paymentId, hasReceipt }: { paymentId: s
 
   async function upload(file: File) {
     setError("");
-    if (file.size === 0 || file.size > 4 * 1024 * 1024) {
-      setError("4 МБ хүртэлх зураг сонгоно уу.");
-      return;
-    }
     setBusy(true);
     try {
-      const body = new FormData();
-      body.append("receipt", file);
-      const response = await fetch(endpoint, { method: "POST", body });
-      if (!response.ok) {
-        const result = await response.json().catch(() => null);
-        throw new Error(result?.error || "Баримт хадгалах боломжгүй байна.");
-      }
+      await uploadPaymentReceipt(endpoint, file);
       setSaved(true);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Баримт хадгалахад алдаа гарлаа.");
@@ -36,7 +44,7 @@ export default function PaymentReceipt({ paymentId, hasReceipt }: { paymentId: s
 
   return (
     <div className="mt-2 space-y-1.5">
-      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+      <input ref={input} type="file" accept={receiptImageTypes} className="hidden"
         onChange={event => {
           const file = event.currentTarget.files?.[0];
           event.currentTarget.value = "";

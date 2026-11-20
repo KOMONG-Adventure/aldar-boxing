@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Member, FightRecord, PaymentHistoryItem } from "@/lib/db";
 import SiblingBilling from "./SiblingBilling";
-import PaymentReceipt from "./PaymentReceipt";
+import PaymentReceipt, { receiptImageTypes, uploadPaymentReceipt, validateReceiptImage } from "./PaymentReceipt";
 import { billingToday, monthlyDueDate, studentPaymentState } from "@/lib/billing";
 
 interface MemberDetailModalProps {
@@ -36,6 +36,8 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
 
   // Шинэ төлбөр бүртгэх модал/хэсэг
   const [showAddPayment, setShowAddPayment] = useState(false);
+  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
+  const [receiptError, setReceiptError] = useState("");
   const [paymentSubmitting, setPaymentSubmitting] = useState(false);
   const [billingPending, setBillingPending] = useState(false);
   const [paymentError, setPaymentError] = useState("");
@@ -131,7 +133,9 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
     e.preventDefault();
     if (paymentSubmitting || billingPending) return;
     setPaymentError("");
+    setReceiptError("");
     try {
+      if (paymentReceipt) validateReceiptImage(paymentReceipt);
       setPaymentSubmitting(true);
       if (!paymentId.current) paymentId.current = crypto.randomUUID();
       const res = await fetch("/api/payments", {
@@ -149,7 +153,15 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Төлбөр бүртгэхэд алдаа гарлаа.");
 
+      if (paymentReceipt) {
+        try {
+          await uploadPaymentReceipt(`/api/payments/receipt?paymentId=${encodeURIComponent(data.payment.id)}`, paymentReceipt);
+        } catch {
+          setReceiptError("Төлбөр бүртгэгдсэн. Зураг хавсаргахад алдаа гарлаа. Төлбөрийн түүхээс зургаа дахин оруулна уу.");
+        }
+      }
       paymentId.current = null;
+      setPaymentReceipt(null);
       setShowAddPayment(false);
       setEditForm((prev) => ({
         ...prev,
@@ -352,7 +364,9 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                 </div>
 
                 <button
+                  disabled={paymentSubmitting}
                   onClick={() => {
+                    setPaymentReceipt(null);
                     if (!showAddPayment) {
                       paymentId.current = null;
                       setPaymentError("");
@@ -376,7 +390,8 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                     </span>
                     <button
                       type="button"
-                      onClick={() => setShowAddPayment(false)}
+                      disabled={paymentSubmitting}
+                      onClick={() => { setPaymentReceipt(null); setShowAddPayment(false); }}
                       className="text-zinc-400 hover:text-white"
                     >
                       <X size={16} />
@@ -473,6 +488,24 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                     />
                   </div>
 
+                  <div>
+                    <label htmlFor="new-payment-receipt" className="mb-1 block text-[11px] font-medium text-zinc-300">Баримтын зураг</label>
+                    <input id="new-payment-receipt" type="file" accept={receiptImageTypes} disabled={paymentSubmitting}
+                      onChange={event => {
+                        const file = event.currentTarget.files?.[0] ?? null;
+                        setPaymentError("");
+                        try {
+                          if (file) validateReceiptImage(file);
+                          setPaymentReceipt(file);
+                        } catch (error) {
+                          event.currentTarget.value = "";
+                          setPaymentReceipt(null);
+                          setPaymentError(error instanceof Error ? error.message : "Зургийг шалгана уу.");
+                        }
+                      }}
+                      className="block w-full rounded-xl border border-zinc-700 bg-[var(--club-raised)] p-2 text-xs text-zinc-300 file:mr-2 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-zinc-200"
+                    />
+                  </div>
                   {paymentError && <p role="alert" className="text-xs text-red-400">{paymentError}</p>}
                   <button
                     type="submit"
@@ -487,6 +520,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
 
               {/* ТӨЛБӨРИЙН ТҮҮХИЙН ЖАГСААЛТ (TIMELINE) */}
               <div className="space-y-2.5">
+                {receiptError && <p role="alert" className="text-xs text-red-400">{receiptError}</p>}
                 <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                   <History size={14} className="text-red-500" /> Төлбөр хийгдсэн бүх түүх
                 </h4>
