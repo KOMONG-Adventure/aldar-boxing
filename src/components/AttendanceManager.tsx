@@ -6,6 +6,7 @@ import {
   Clock,
   Users,
   UserCheck,
+  LoaderCircle,
   Check,
   X,
   Search,
@@ -20,13 +21,16 @@ import {
   Filter,
   UserX,
 } from "lucide-react";
-import { SessionItem, Member, AttendanceRecord } from "@/lib/db";
+import { SessionItem, Member, AttendanceRecord, AttendanceStatus } from "@/lib/db";
 import AddSessionModal from "./AddSessionModal";
 import AttendanceReport from "./AttendanceReport";
 import { billingToday } from "@/lib/billing";
 import { scheduleSummary, sessionSlots, slotsOnDate } from "@/lib/schedules";
 
+const attendanceLabels: Record<AttendanceStatus, string> = { present: "Ирсэн", sick: "Өвчтэй", absent: "Тасалсан" };
+
 interface AttendanceManagerProps {
+  onAttendanceSaved: (sessionId: string, date: string, ids: string[], records: AttendanceRecord[]) => void;
   sessions: SessionItem[];
   members: Member[];
   attendances: AttendanceRecord[];
@@ -38,17 +42,17 @@ export default function AttendanceManager({
   members,
   attendances,
   onRefresh,
+  onAttendanceSaved,
 }: AttendanceManagerProps) {
   // Огноо
   const [selectedDate, setSelectedDate] = useState<string>(billingToday);
   const todayStr = billingToday();
   const [showAllSessions, setShowAllSessions] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState<string>(
-    sessions[0]?.id || "",
-  );
+  const [selectedSessionId, setSelectedSessionId] = useState("");
   const [searchMember, setSearchMember] = useState("");
-  const [activeView, setActiveView] = useState<"enrolled" | "all">("enrolled");
-  const [attendanceSaving, setAttendanceSaving] = useState(false);
+  const [pendingAttendance, setPendingAttendance] = useState<{ sessionId: string; date: string; memberIds: string[]; status: AttendanceStatus | null; bulk: boolean } | null>(null);
+  const [attendanceError, setAttendanceError] = useState("");
+  const attendanceSaving = pendingAttendance !== null;
 
   // Сонгогдсон анги
   const daySessions = sessions.filter(
@@ -56,8 +60,7 @@ export default function AttendanceManager({
   );
   const visibleSessions = showAllSessions ? sessions : daySessions;
   const currentSession =
-    visibleSessions.find((session) => session.id === selectedSessionId) ||
-    visibleSessions[0];
+    visibleSessions.find((session) => session.id === selectedSessionId);
   const currentSlots = currentSession
     ? slotsOnDate(currentSession, selectedDate)
     : [];
@@ -72,7 +75,9 @@ export default function AttendanceManager({
     (a) => a.date === selectedDate && a.sessionId === currentSession?.id,
   );
 
-  const attendedMemberIds = dayAttendances.map((a) => a.memberId);
+  const pendingHere = pendingAttendance?.sessionId === currentSession?.id && pendingAttendance?.date === selectedDate ? pendingAttendance : null;
+  const attendedMemberIds = dayAttendances.filter(row => row.status === "present" && !pendingHere?.memberIds.includes(row.memberId)).map(row => row.memberId);
+  if (pendingHere?.status === "present") attendedMemberIds.push(...pendingHere.memberIds);
 
   // Огноо нааш цааш шилжүүлэх
   const changeDateByDays = (days: number) => {
@@ -85,61 +90,34 @@ export default function AttendanceManager({
 
   const isToday = selectedDate === todayStr && todayStr !== "";
 
-  // Ирц тэмдэглэх эсвэл цуцлах
-  const handleToggleAttendance = async (memberId: string) => {
-    if (!currentSession || currentSlots.length === 0 || attendanceSaving) return;
-    setAttendanceSaving(true);
+  const saveAttendance = async (memberIds: string[], status: AttendanceStatus | null, bulk = false) => {
+    if (!currentSession || currentSlots.length === 0 || pendingAttendance || !memberIds.length) return;
+    const sessionId = currentSession.id;
+    const date = selectedDate;
+    setAttendanceError("");
+    setPendingAttendance({ sessionId, date, memberIds, status, bulk });
     try {
       const response = await fetch("/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: currentSession.id,
-          memberId,
-          date: selectedDate,
-          action: attendedMemberIds.includes(memberId) ? "REMOVE" : "CHECKIN",
-        }),
+        body: JSON.stringify({ sessionId, date, memberIds, action: status === null ? "REMOVE" : "SET", status }),
       });
-      if (!response.ok) throw new Error("Ирц хадгалах боломжгүй байна.");
-      onRefresh();
-    } catch (e) {
-      alert("Ирц бүртгэхэд алдаа гарлаа");
+      const result = await response.json();
+      if (!response.ok || !Array.isArray(result.records)) {
+        throw new Error(result.error || "Ирц хадгалах боломжгүй байна.");
+      }
+      onAttendanceSaved(sessionId, date, memberIds, result.records);
+    } catch (error) {
+      setAttendanceError(error instanceof Error ? error.message : "Ирц хадгалахад алдаа гарлаа.");
     } finally {
-      setAttendanceSaving(false);
+      setPendingAttendance(null);
     }
   };
 
-  // "Бүгдийг ирсэн болгох" (Mark All Present)
-  const handleMarkAllPresent = async () => {
-    if (!currentSession || currentSlots.length === 0 || attendanceSaving) return;
-    const enrolledIds = currentSession.enrolledMemberIds || [];
-    const toCheckIn = enrolledIds.filter(
-      (id) => !attendedMemberIds.includes(id),
-    );
 
-    if (toCheckIn.length === 0) return;
-    setAttendanceSaving(true);
 
-    try {
-      const response = await fetch("/api/attendance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: currentSession.id,
-          memberIds: toCheckIn,
-          date: selectedDate,
-          action: "CHECKIN",
-        }),
-      });
-      if (!response.ok) throw new Error("Ирц хадгалах боломжгүй.");
-      onRefresh();
-    } catch {
-      alert("Ирц хадгалахад алдаа гарлаа.");
-    } finally {
-      setAttendanceSaving(false);
-    }
-  };
-
+  const handleMarkAllPresent = () =>
+    saveAttendance((currentSession?.enrolledMemberIds || []).filter(id => !dayAttendances.some(row => row.memberId === id)), "present", true);
   // Анги устгах
   const handleDeleteSession = async (id: string, title: string) => {
     if (!confirm(`"${title}" бэлтгэлийн ангийг устгах уу?`)) return;
@@ -157,7 +135,7 @@ export default function AttendanceManager({
   );
 
   const displayList = (
-    activeView === "enrolled" ? enrolledList : members
+    enrolledList
   ).filter(
     (m) =>
       `${m.lastName || ""} ${m.name}`
@@ -257,14 +235,14 @@ export default function AttendanceManager({
               const isSelected = s.id === currentSession?.id;
               // Энэ өдөр тухайн ангид ирсэн тоо
               const sCount = attendances.filter(
-                (a) => a.date === selectedDate && a.sessionId === s.id,
+                (a) => a.date === selectedDate && a.sessionId === s.id && a.status === "present",
               ).length;
               const totalEnrolled = s.enrolledMemberIds?.length || 0;
 
               return (
                 <div
                   key={s.id}
-                  onClick={() => setSelectedSessionId(s.id)}
+                  onClick={() => { setSearchMember(""); setAttendanceError(""); setSelectedSessionId(isSelected ? "" : s.id); }}
                   className={`p-3.5 rounded-2xl border cursor-pointer transition-all relative ${
                     isSelected
                       ? "bg-gradient-to-br from-red-950/40 via-[#18181c] to-[#121215] border-red-500 shadow-md shadow-red-950/40"
@@ -272,9 +250,9 @@ export default function AttendanceManager({
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-white truncate max-w-[150px]">
+                    <button type="button" aria-expanded={isSelected && currentSlots.length > 0} className="text-left text-xs font-bold text-white truncate max-w-[150px]">
                       {s.title}
-                    </span>
+                    </button>
                     <div className="flex shrink-0 items-center">
                       <AddSessionModal
                         session={s}
@@ -376,7 +354,7 @@ export default function AttendanceManager({
                 title="Бүртгэлтэй бүх сурагчдыг 1 товшилтоор ирсэнд тооцох"
                 className="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95"
               >
-                <CheckCircle2 size={14} /> Бүгд ирсэн
+                {pendingHere?.bulk ? <LoaderCircle size={14} className="motion-safe:animate-spin" /> : <CheckCircle2 size={14} />} Бүртгээгүйг ирсэн болгох
               </button>
             </div>
           </div>
@@ -398,35 +376,15 @@ export default function AttendanceManager({
             </div>
 
             <div className="flex gap-1.5 bg-[var(--club-raised)] p-1 rounded-xl border border-zinc-800 text-xs shrink-0">
-              <button
-                onClick={() => setActiveView("enrolled")}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
-                  activeView === "enrolled"
-                    ? "bg-red-600 text-white shadow"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Бүртгэлтэй ({enrolledList.length})
-              </button>
-              <button
-                onClick={() => setActiveView("all")}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
-                  activeView === "all"
-                    ? "bg-red-600 text-white shadow"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Бүх сурагчид ({members.length})
-              </button>
             </div>
           </div>
 
+          {attendanceError && <p role="alert" className="text-sm text-red-400">{attendanceError}</p>}
           {/* СУРАГЧДЫН ИРЦ АВАХ БОДИТ ЖАГСААЛТ (One-Tap Attendance Rows) */}
           <div className="space-y-2">
             {displayList.length === 0 ? (
               <div className="text-center py-8 text-zinc-500 text-xs bg-[var(--club-raised)] rounded-2xl border border-zinc-800/80">
-                Сурагч олдсонгүй. «Бүх сурагчид» табыг сонгож эсвэл «Шинэ
-                гишүүн» нэмнэ үү.
+                Бүртгэлтэй сурагч олдсонгүй.
               </div>
             ) : (
               displayList.map((m) => {
@@ -440,17 +398,8 @@ export default function AttendanceManager({
                 return (
                   <div
                     key={m.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-disabled={attendanceSaving}
-                    onKeyDown={event => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        void handleToggleAttendance(m.id);
-                      }
-                    }}
-                    onClick={() => handleToggleAttendance(m.id)}
-                    className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 group select-none ${
+
+                    className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 group select-none ${
                       isAttended
                         ? "bg-emerald-950/20 border-emerald-500/50 hover:bg-emerald-950/30"
                         : "bg-[var(--club-raised)] border-zinc-800/80 hover:border-zinc-700"
@@ -520,24 +469,18 @@ export default function AttendanceManager({
                         </span>
                       )}
 
-                      <button
-                        type="button"
-                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-md ${
-                          isAttended
-                            ? "bg-emerald-600 text-white shadow-emerald-600/30"
-                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700"
-                        }`}
+                      {pendingHere?.memberIds.includes(m.id) && <LoaderCircle size={16} role="status" aria-label="Ирц хадгалж байна" className="text-red-400 motion-safe:animate-spin" />}
+                      <select
+                        aria-label={`${m.name} сурагчийн ирц`}
+                        aria-busy={pendingHere?.memberIds.includes(m.id) || undefined}
+                        disabled={attendanceSaving}
+                        value={pendingHere?.memberIds.includes(m.id) ? pendingHere.status ?? "" : attRecord?.status ?? ""}
+                        onChange={event => void saveAttendance([m.id], (event.target.value || null) as AttendanceStatus | null)}
+                        className={`min-h-10 max-w-full rounded-xl border px-2 text-xs font-semibold ${isAttended ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-400" : "border-zinc-700 bg-[var(--club-panel)] text-zinc-300"}`}
                       >
-                        {isAttended ? (
-                          <>
-                            <Check size={14} strokeWidth={3} /> ИРСЭН
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck size={14} /> ИРЦ АВАХ
-                          </>
-                        )}
-                      </button>
+                        <option value="">Тэмдэглээгүй</option>
+                        {Object.entries(attendanceLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                      </select>
                     </div>
                   </div>
                 );
@@ -548,7 +491,7 @@ export default function AttendanceManager({
       )}
 
       {/* 4. СҮҮЛД БҮРТГЭГДСЭН ИРЦИЙН ЖАГСААЛТ (History Feed) */}
-      <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl p-4">
+      {currentSession && currentSlots.length > 0 && <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl p-4">
         <h4 className="text-xs font-bold text-zinc-300 mb-3 flex items-center gap-1.5">
           <Clock size={14} className="text-red-500" /> {selectedDate} өдрийн
           бүртгэгдсэн ирцийн бүртгэл
@@ -565,7 +508,7 @@ export default function AttendanceManager({
                 className="flex justify-between items-center text-xs py-2 px-3 bg-[var(--club-raised)] rounded-xl border border-zinc-800/60"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className={`w-2 h-2 rounded-full ${att.status === "present" ? "bg-emerald-500" : att.status === "sick" ? "bg-amber-500" : "bg-red-500"}`} />
                   <span className="text-white font-semibold">
                     {att.memberName}
                   </span>
@@ -574,13 +517,13 @@ export default function AttendanceManager({
                   </span>
                 </div>
                 <span className="text-zinc-500 font-mono text-[11px]">
-                  {att.checkInTime}
+                  {attendanceLabels[att.status]} · {att.checkInTime}
                 </span>
               </div>
             ))
           )}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

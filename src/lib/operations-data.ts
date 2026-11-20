@@ -2,12 +2,14 @@ import "server-only";
 import { getSupabaseAdmin } from "./supabase/server";
 import type { AttendanceRecord, FightRecord } from "./db";
 
-export async function getAttendance(): Promise<AttendanceRecord[]> {
+export async function getAttendance(selection?: { sessionId: string; date: string; memberIds: string[] }): Promise<AttendanceRecord[]> {
   const records: AttendanceRecord[] = [];
   for (let offset = 0; ; offset += 500) {
-    const { data, error } = await getSupabaseAdmin()
+    let query = getSupabaseAdmin()
       .from("attendance_records")
-      .select("*, students(name,last_name), sessions(title)")
+      .select("*, students(name,last_name), sessions(title)");
+    if (selection) query = query.eq("session_id", selection.sessionId).eq("date", selection.date).in("student_id", selection.memberIds);
+    const { data, error } = await query
       .order("date", { ascending: false })
       .order("id")
       .range(offset, offset + 499);
@@ -15,6 +17,7 @@ export async function getAttendance(): Promise<AttendanceRecord[]> {
     records.push(
       ...data.map((row) => ({
         id: row.id,
+        status: row.status,
         sessionId: row.session_id,
         memberId: row.student_id,
         sessionTitle: row.sessions?.title,

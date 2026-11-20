@@ -84,7 +84,10 @@ export interface SessionItem {
   timeSlots?: SessionTimeSlot[];
 }
 
+export type AttendanceStatus = "present" | "sick" | "absent";
+
 export interface AttendanceRecord {
+  status: AttendanceStatus;
   id: string;
   sessionId: string;
   sessionTitle?: string;

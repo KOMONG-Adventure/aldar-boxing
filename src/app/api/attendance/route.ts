@@ -34,6 +34,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const ids = body.memberIds || [body.memberId];
+    const status = body.action === "REMOVE" ? null : body.action === "CHECKIN" ? "present" : body.status;
     if (
       typeof body.sessionId !== "string" ||
       !isScheduleDate(body.date) ||
@@ -41,23 +42,29 @@ export async function POST(request: Request) {
       ids.length < 1 ||
       ids.length > 100 ||
       ids.some((id) => typeof id !== "string") ||
-      !["CHECKIN", "REMOVE"].includes(body.action)
+      !["CHECKIN", "REMOVE", "SET"].includes(body.action) ||
+      (body.action !== "REMOVE" && !["present", "sick", "absent"].includes(status))
     ) {
       return NextResponse.json(
         { error: "Ирцийн мэдээллийг шалгана уу." },
         { status: 400 },
       );
     }
-    const { error } = await getSupabaseAdmin().rpc("set_training_attendance", {
+    const memberIds = [...new Set<string>(ids)];
+    const { error } = await getSupabaseAdmin().rpc("set_training_attendance_status", {
       p_session: body.sessionId,
-      p_students: ids,
+      p_students: memberIds,
       p_date: body.date,
-      p_present: body.action === "CHECKIN",
+      p_status: status,
     });
     if (error) throw error;
+    const records = status !== null
+      ? await getAttendance({ sessionId: body.sessionId, date: body.date, memberIds })
+      : [];
     return NextResponse.json({
       success: true,
-      attended: body.action === "CHECKIN",
+      attended: status === "present",
+      records,
     });
   } catch (error) {
     console.error(error);

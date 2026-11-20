@@ -46,6 +46,11 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
   const [filterPayment, setFilterPayment] = useState<"all" | "paid" | "unpaid">("all");
   const [loading, setLoading] = useState(true);
   const [memberLoadError, setMemberLoadError] = useState("");
+  const attendanceCounts = new Map<string, number>();
+  for (const record of attendances) {
+    if (record.status !== "present") continue;
+    attendanceCounts.set(record.memberId, (attendanceCounts.get(record.memberId) ?? 0) + 1);
+  }
 
   // Бүх өгөгдлийг татах
   const fetchAllData = async () => {
@@ -117,7 +122,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
       "Дүүрэг": m.district || "",
       "Төлбөрийн төлөв": (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m).kind) : m.status === "PAID") ? "Төлсөн" : "Төлөөгүй",
       ...(canManageFinance ? { "Эхэлсэн огноо": m.paymentDate, "Дуусах огноо": m.expireDate } : {}),
-      "Ирцийн тоо": m.attendancesCount || 0,
+      "Ирцийн тоо": attendanceCounts.get(m.id) ?? 0,
       "Тулааны рекорд": `${m.fights?.filter(f => f.result === 'WIN').length || 0}W - ${m.fights?.filter(f => f.result === 'LOSS').length || 0}L`,
       "Асран хамгаалагч": m.guardians?.map(g => `${g.name} (${g.relation} - ${g.phone})`).join("; ") || ""
     }));
@@ -232,6 +237,12 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
             sessions={sessions}
             members={members}
             attendances={attendances}
+            onAttendanceSaved={(sessionId, date, ids, records) => {
+              setAttendances(current => [
+                ...records,
+                ...current.filter(row => row.sessionId !== sessionId || row.date !== date || !ids.includes(row.memberId)),
+              ]);
+            }}
             onRefresh={fetchAllData}
           />
         )}
@@ -350,7 +361,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                           <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
                             <span>📞 {m.phone}</span>
                             <span>•</span>
-                            <span className="text-zinc-500">Нийт ирц: {m.attendancesCount || 0}</span>
+                            <span className="text-zinc-500">Нийт ирц: {attendanceCounts.get(m.id) ?? 0}</span>
                             {fights.length > 0 && (
                               <span className="text-[10px] bg-amber-500/15 text-amber-400 px-1.5 py-0.5 rounded font-bold">
                                 🏆 {wins}W - {losses}L

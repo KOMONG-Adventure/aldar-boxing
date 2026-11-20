@@ -46,7 +46,7 @@ export async function getStudentAppData(): Promise<AppData> {
   }
   for (const member of local.members) {
     member.fights = fights.get(member.id) || [];
-    member.attendancesCount = attendances.filter(a => a.memberId === member.id).length;
+    member.attendancesCount = attendances.filter(a => a.memberId === member.id && a.status === "present").length;
     member.paymentHistory = historyByStudent.get(member.id) || [];
     member.assignedSessionIds = sessions.filter(session => session.enrolledMemberIds.includes(member.id)).map(session => session.id);
   }

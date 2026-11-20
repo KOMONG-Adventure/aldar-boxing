@@ -15,16 +15,16 @@ export default function AttendanceReport({ date, attendances }: {
   const monday = anchor.getUTCDate() - (anchor.getUTCDay() + 6) % 7;
   const start = new Date(Date.UTC(year, month, period === "week" ? monday : 1)).toISOString().slice(0, 10);
   const end = new Date(period === "week" ? Date.UTC(year, month, monday + 6) : Date.UTC(year, month + 1, 0)).toISOString().slice(0, 10);
-  const counts = new Map<string, { name: string; count: number }>();
+  const counts = new Map<string, { name: string; present: number; sick: number; absent: number }>();
   let total = 0;
   for (const row of attendances) {
     if (row.date < start || row.date > end) continue;
-    const entry = counts.get(row.memberId) ?? { name: row.memberName, count: 0 };
-    entry.count++;
+    const entry = counts.get(row.memberId) ?? { name: row.memberName, present: 0, sick: 0, absent: 0 };
+    entry[row.status]++;
     counts.set(row.memberId, entry);
     total++;
   }
-  const students = [...counts.entries()].sort(([, a], [, b]) => b.count - a.count || a.name.localeCompare(b.name));
+  const students = [...counts.entries()].sort(([, a], [, b]) => b.present - a.present || a.name.localeCompare(b.name));
 
   return (
     <details className="rounded-2xl border border-zinc-800 bg-[var(--club-panel)]">
@@ -50,13 +50,20 @@ export default function AttendanceReport({ date, attendances }: {
         ) : (
           <table className="w-full text-sm">
             <thead className="text-xs text-zinc-400">
-              <tr><th scope="col" className="py-2 text-left">Сурагч</th><th scope="col" className="py-2 text-right">Ирцийн тоо</th></tr>
+              <tr>
+                <th scope="col" className="py-2 text-left">Сурагч</th>
+                <th scope="col" className="py-2 text-right">Ирсэн</th>
+                <th scope="col" className="py-2 text-right">Өвчтэй</th>
+                <th scope="col" className="py-2 text-right">Тасалсан</th>
+              </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {students.map(([id, student]) => (
                 <tr key={id}>
                   <th scope="row" className="py-2 text-left font-medium">{student.name}</th>
-                  <td className="py-2 text-right tabular-nums">{student.count}</td>
+                  <td className="py-2 text-right tabular-nums">{student.present}</td>
+                  <td className="py-2 text-right tabular-nums">{student.sick}</td>
+                  <td className="py-2 text-right tabular-nums">{student.absent}</td>
                 </tr>
               ))}
             </tbody>
