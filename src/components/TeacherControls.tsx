@@ -3,11 +3,11 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { LogOut, UserPlus, X, Copy } from "lucide-react";
 
-export default function TeacherControls({ canInvite }: { canInvite: boolean }) {
+export default function TeacherControls({ action }: { action: "invite" | "logout" }) {
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
-  const run = async (action: "invite" | "logout") => {
+  const run = async () => {
     setBusy(true);
     try {
       const response = await fetch("/api/teacher", {
@@ -30,28 +30,27 @@ export default function TeacherControls({ canInvite }: { canInvite: boolean }) {
   };
   return (
     <>
-      {canInvite && <button
+      {action === "invite" ? <button
         type="button"
         disabled={busy}
-        onClick={() => run("invite")}
-        aria-label="Багш урих"
-        title="Багш урих"
-        className="p-2 text-zinc-400 hover:text-white disabled:opacity-50"
+        onClick={run}
+        className="w-full flex items-center gap-2 rounded-2xl border border-zinc-700 px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"
       >
         <UserPlus size={18} />
-      </button>}
+        Багш нэмэх
+      </button> :
       <button
         type="button"
         disabled={busy}
-        onClick={() => run("logout")}
+        onClick={run}
         aria-label="Гарах"
         title="Гарах"
         className="p-2 text-zinc-400 hover:text-white disabled:opacity-50"
       >
         <LogOut size={18} />
-      </button>
+      </button>}
       {link && createPortal(
-        <div className="fixed inset-0 z-50 bg-black/80 p-4 grid place-items-center">
+        <div className="fixed inset-0 z-[60] bg-black/80 p-4 grid place-items-center text-white">
           <div
             role="dialog"
             aria-modal="true"

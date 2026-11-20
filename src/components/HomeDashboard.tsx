@@ -177,7 +177,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
           </div>
 
           <div className="flex shrink-0 items-center gap-0 sm:gap-2">
-            <TeacherControls canInvite={canManageFinance} />
+            <TeacherControls action="logout" />
             <button
               onClick={fetchAllData}
               title="Шинэчлэх"

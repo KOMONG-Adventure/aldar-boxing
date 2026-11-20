@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import TeacherControls from "./TeacherControls";
 import { createPortal } from "react-dom";
 import { Settings, X, Save, Clock, DollarSign, BellRing, Shield } from "lucide-react";
 import { AppSettings } from "@/lib/db";
@@ -155,6 +156,9 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                 </button>
               </div>
             </form>
+            <div className="mt-5 border-t border-zinc-800 pt-4">
+              <TeacherControls action="invite" />
+            </div>
           </div>
         </div>
       , document.body)}
