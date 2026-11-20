@@ -53,13 +53,14 @@ export async function POST(request: Request) {
     const password = typeof body.password === "string" ? body.password : "";
     if (
       !/^[a-z0-9._-]{3,40}$/.test(username) ||
-      password.length < 10 ||
+      password.length < (body.action === "setup" ? 10 : 1) ||
       password.length > 128
     ) {
       return NextResponse.json(
         {
-          error:
-            "Нэвтрэх нэр 3–40 латин тэмдэгт, нууц үг 10–128 тэмдэгт байна.",
+          error: body.action === "setup"
+            ? "Нэвтрэх нэр 3–40 латин тэмдэгт, нууц үг 10–128 тэмдэгт байна."
+            : "Нэвтрэх нэр болон нууц үгээ шалгана уу.",
         },
         { status: 400 },
       );
