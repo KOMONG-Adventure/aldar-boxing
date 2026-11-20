@@ -386,3 +386,40 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
+:root[data-surface="white"] {
+  color-scheme: light;
+  --background: #fff;
+  --foreground: #18181b;
+  --club-background: #fff;
+  --club-panel: #f8fafc;
+  --club-raised: #f1f5f9;
+  --color-zinc-100: #18181b;
+  --color-zinc-200: #27272a;
+  --color-zinc-300: #3f3f46;
+  --color-zinc-400: #52525b;
+  --color-zinc-500: #62626c;
+  --color-zinc-600: #71717a;
+  --color-zinc-700: #c2c5cd;
+  --color-zinc-800: #e1e4ea;
+  --color-zinc-900: #f1f5f9;
+  --color-zinc-950: #fff;
+}
+[data-surface="white"] .text-white { color: #18181b; }
+[data-surface="white"] :is(.bg-red-600, .bg-red-700, .bg-rose-600, .bg-emerald-600, .bg-amber-600, .from-red-600).text-white,
+[data-surface="white"] .from-red-600 .text-white,
+[data-surface="white"] .hover\:bg-red-600:hover.hover\:text-white { color: #fff; }
+[data-surface="white"] :is(.text-red-300, .text-red-400, .text-red-500, .text-rose-300, .text-rose-400, .text-rose-500),
+[data-surface="white"] .club-navigation button[aria-current="page"] {
+  color: color-mix(in srgb, var(--color-red-700) 78%, #111827);
+}
+[data-surface="white"] :is(.text-emerald-300, .text-emerald-400, .text-emerald-500) { color: #065f46; }
+[data-surface="white"] :is(.text-amber-300, .text-amber-400, .text-yellow-400, .text-yellow-500) { color: #854d0e; }
+[data-surface="white"] :is(.text-blue-300, .text-blue-400, .text-sky-400) { color: #1e40af; }
+[data-surface="white"] :is(.text-purple-400, .text-indigo-400) { color: #5b21b6; }
+[data-surface="white"] .club-navigation button:hover { color: #18181b; }
+[data-surface="white"] :is(input[type="date"], input[type="time"]) { color-scheme: light; }
+[data-surface="white"] :is(input[type="date"], input[type="time"])::-webkit-calendar-picker-indicator { filter: none; }
+[data-surface="white"][data-card="stripe"] .print-student-card {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-red-500) 16%, white), var(--club-raised) 65%);
+}
+

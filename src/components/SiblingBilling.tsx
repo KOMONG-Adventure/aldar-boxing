@@ -45,7 +45,7 @@ export default function SiblingBilling({ member, members, onRefresh, onPendingCh
   };
 
   return (
-    <div className="space-y-3 rounded-2xl border border-zinc-800 bg-[#19191d] p-4 text-xs">
+    <div className="space-y-3 rounded-2xl border border-zinc-800 bg-[var(--club-raised)] p-4 text-xs">
       <div className="flex items-center justify-between gap-3">
         <label className="flex min-h-10 items-center gap-2 font-semibold text-white">
           <input type="checkbox" checked={!!member.siblingId || enabled} disabled={saving || disabled} onChange={event => {
@@ -62,7 +62,7 @@ export default function SiblingBilling({ member, members, onRefresh, onPendingCh
       {!member.siblingId && enabled && (
         <div className="space-y-3">
           <label htmlFor="sibling-student" className="block text-zinc-300">Нөгөө хүүхдийг сонгох</label>
-          <select id="sibling-student" value={selectedId} disabled={saving || disabled} onChange={event => setSelectedId(event.target.value)} className="min-h-11 w-full rounded-xl border border-zinc-700 bg-[#131316] px-3 text-white">
+          <select id="sibling-student" value={selectedId} disabled={saving || disabled} onChange={event => setSelectedId(event.target.value)} className="min-h-11 w-full rounded-xl border border-zinc-700 bg-[var(--club-raised)] px-3 text-white">
             <option value="">Хүүхэд сонгох</option>
             {candidates.map(item => <option key={item.id} value={item.id}>{fullName(item)} · {item.phone}</option>)}
           </select>

@@ -32,7 +32,7 @@ interface TimeGroup {
   endTime: string;
 }
 const inputClass =
-  "min-h-11 min-w-0 w-full rounded-xl border border-zinc-700/80 bg-[#131316] px-3 py-2 text-white focus:outline-none focus:border-red-500";
+  "min-h-11 min-w-0 w-full rounded-xl border border-zinc-700/80 bg-[var(--club-raised)] px-3 py-2 text-white focus:outline-none focus:border-red-500";
 const presets = [
   { title: "Да, Лх, Ба", days: [1, 3, 5] },
   { title: "Мя, Пү, Бя", days: [2, 4, 6] },
@@ -289,7 +289,7 @@ export default function AddSessionModal({
                                 aria-pressed={group.days.includes(day.id)}
                                 aria-label={day.name}
                                 onClick={() => toggleDay(group, day.id)}
-                                className={`min-h-11 rounded-xl border text-center font-semibold ${group.days.includes(day.id) ? "border-red-500 bg-red-600 text-white" : "border-zinc-700 bg-[#131316] text-zinc-400"}`}
+                                className={`min-h-11 rounded-xl border text-center font-semibold ${group.days.includes(day.id) ? "border-red-500 bg-red-600 text-white" : "border-zinc-700 bg-[var(--club-raised)] text-zinc-400"}`}
                               >
                                 {day.short}
                               </button>

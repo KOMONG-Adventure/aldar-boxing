@@ -242,7 +242,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
       <div className="bg-[var(--club-panel)] border border-zinc-800 rounded-3xl w-full max-w-lg text-white shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Толгой хэсэг */}
-        <div className="flex justify-between items-center gap-3 px-4 sm:px-6 py-4 border-b border-zinc-800 shrink-0 bg-[#17171a]">
+        <div className="flex justify-between items-center gap-3 px-4 sm:px-6 py-4 border-b border-zinc-800 shrink-0 bg-[var(--club-raised)]">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             {editForm.avatarUrl ? (
               <button
@@ -394,7 +394,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                           className={`py-1.5 rounded-xl border text-xs font-bold transition ${
                             paymentFormData.periodMonths === m
                               ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/30"
-                              : "bg-[#131316] border-zinc-800 text-zinc-400 hover:text-white"
+                              : "bg-[var(--club-raised)] border-zinc-800 text-zinc-400 hover:text-white"
                           }`}
                         >
                           {m} сар
@@ -412,7 +412,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         required
                         value={monthlyFee * paymentFormData.periodMonths}
                         readOnly
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-bold"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-bold"
                       />
                     </div>
                     <div>
@@ -420,7 +420,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       <select
                         value={paymentFormData.method}
                         onChange={(e) => setPaymentFormData({ ...paymentFormData, method: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs"
                       >
                         <option value="Дансаар (Хаан банк)">Дансаар (Хаан банк)</option>
                         <option value="Дансаар (Голомт банк)">Дансаар (Голомт банк)</option>
@@ -446,7 +446,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                             expireDate: paymentEndDate(e.target.value, paymentFormData.periodMonths),
                           });
                         }}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                       />
                     </div>
                     <div>
@@ -456,7 +456,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         required
                         value={paymentFormData.expireDate}
                         readOnly
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-semibold"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-semibold"
                       />
                     </div>
                   </div>
@@ -469,7 +469,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       placeholder="Жишээ: 11-р сарын төлбөр, Болд дасгалжуулагчид бэлнээр өгсөн"
                       value={paymentFormData.note}
                       onChange={(e) => setPaymentFormData({ ...paymentFormData, note: e.target.value })}
-                      className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                     />
                   </div>
 
@@ -745,7 +745,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                 <button
                   onClick={handlePrint}
                     disabled={!qrDataUrl}
-                  className="py-2.5 px-3 bg-[#1e1e24] hover:bg-zinc-800 border border-zinc-700/80 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                  className="py-2.5 px-3 bg-[var(--club-raised)] hover:bg-zinc-800 border border-zinc-700/80 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition"
                 >
                   <Printer size={15} /> Карт хэвлэх
                 </button>
@@ -814,7 +814,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         type="text"
                         value={editForm.lastName}
                         onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                       />
                     </div>
                     <div>
@@ -824,7 +824,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         required
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-bold"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-bold"
                       />
                     </div>
                   </div>
@@ -838,7 +838,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         required
                         value={editForm.phone}
                         onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                       />
                     </div>
                     <div>
@@ -846,7 +846,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       <select
                         value={editForm.level}
                         onChange={(e) => setEditForm({ ...editForm, level: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs"
                       >
                         <option value="Beginner">Анхан шат</option>
                         <option value="Intermediate">Дунд шат</option>
@@ -864,7 +864,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       placeholder="https://... зурагны линк"
                       value={editForm.avatarUrl}
                       onChange={(e) => setEditForm({ ...editForm, avatarUrl: e.target.value })}
-                      className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                     />
                   </div>
 
@@ -877,7 +877,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         placeholder="65"
                         value={editForm.weight}
                         onChange={(e) => setEditForm({ ...editForm, weight: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs text-center"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs text-center"
                       />
                     </div>
                     <div>
@@ -887,7 +887,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         placeholder="175"
                         value={editForm.height}
                         onChange={(e) => setEditForm({ ...editForm, height: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs text-center"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs text-center"
                       />
                     </div>
                     <div>
@@ -897,7 +897,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         placeholder="I, II, III, IV"
                         value={editForm.bloodType}
                         onChange={(e) => setEditForm({ ...editForm, bloodType: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs text-center"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-2 text-white focus:outline-none focus:border-red-500 text-xs text-center"
                       />
                     </div>
                   </div>
@@ -911,7 +911,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         placeholder="УУ99010101"
                         value={editForm.registerNumber}
                         onChange={(e) => setEditForm({ ...editForm, registerNumber: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                       />
                     </div>
                     <div>
@@ -921,7 +921,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         placeholder="Баянзүрх"
                         value={editForm.district}
                         onChange={(e) => setEditForm({ ...editForm, district: e.target.value })}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                       />
                     </div>
                   </div>
@@ -933,7 +933,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       placeholder="13-р хороолол, 25-р байр..."
                       value={editForm.addressDetail}
                       onChange={(e) => setEditForm({ ...editForm, addressDetail: e.target.value })}
-                      className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
                     />
                   </div>
                 </div>

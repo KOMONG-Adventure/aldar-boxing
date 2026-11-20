@@ -51,7 +51,7 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)} 
           />
-          <div role="dialog" aria-label="Мэдэгдлүүд" className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto sm:left-auto sm:w-96 bg-[#161619] border border-zinc-800 rounded-3xl shadow-2xl z-50 p-4 text-xs animate-in fade-in">
+          <div role="dialog" aria-label="Мэдэгдлүүд" className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto sm:left-auto sm:w-96 bg-[var(--club-raised)] border border-zinc-800 rounded-3xl shadow-2xl z-50 p-4 text-xs animate-in fade-in">
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-1.5 font-bold text-white text-sm">
                 <Bell size={16} className="text-red-500" />
@@ -76,7 +76,7 @@ export default function NotificationsModal({ notifications, onRefresh }: Notific
                     key={n.id}
                     className={`p-3 rounded-2xl border transition flex items-start gap-2.5 ${
                       !n.read 
-                        ? 'bg-[#1e1e23] border-zinc-700/80 text-white' 
+                        ? 'bg-[var(--club-raised)] border-zinc-700/80 text-white'
                         : 'bg-[var(--club-panel)] border-zinc-800/60 text-zinc-400'
                     }`}
                   >

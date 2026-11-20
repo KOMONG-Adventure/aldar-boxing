@@ -290,7 +290,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="Жишээ: Бат"
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                   <div>
@@ -303,7 +303,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="Жишээ: Тэмүүлэн"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -320,7 +320,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="80000011"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                   <div>
@@ -329,7 +329,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       type="date"
                       value={formData.birthDate}
                       onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="УА12345678"
                       value={formData.registerNumber}
                       onChange={(e) => setFormData({ ...formData, registerNumber: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white uppercase placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white uppercase placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                   <div>
@@ -351,7 +351,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     <select required={publicRegistration}
                       value={formData.gender}
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
                       <option value="Сонгох" disabled={publicRegistration}>Сонгох</option>
                       <option value="Эрэгтэй">Эрэгтэй</option>
@@ -367,7 +367,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     <select required={publicRegistration}
                       value={formData.level}
                       onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
                       <option value="Beginner">Beginner (Анхан шат)</option>
                       <option value="Intermediate">Intermediate (Дунд шат)</option>
@@ -381,7 +381,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       type="date"
                       value={formData.joinedDate}
                       onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="52"
                       value={formData.weight}
                       onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                   <div>
@@ -405,7 +405,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="165"
                       value={formData.height}
                       onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -419,7 +419,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="4"
                       value={formData.familyCount}
                       onChange={(e) => setFormData({ ...formData, familyCount: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                   <div>
@@ -427,7 +427,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     <select required={publicRegistration}
                       value={formData.bloodType}
                       onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
-                      className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
                       <option value="Сонгох" disabled={publicRegistration}>Сонгох</option>
                       <option value="I (O+)">I (O+)</option>
@@ -452,7 +452,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     <select required={publicRegistration}
                       value={formData.district}
                       onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                     >
                       <option value="Сонгох" disabled={publicRegistration}>Сонгох</option>
                       <option value="Баянзүрх дүүрэг">Баянзүрх дүүрэг</option>
@@ -473,7 +473,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       placeholder="Жишээ: 14-р хороо, 55-р байр 12 тоот"
                       value={formData.addressDetail}
                       onChange={(e) => setFormData({ ...formData, addressDetail: e.target.value })}
-                      className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                      className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -512,7 +512,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                         placeholder="Бат Эрдэнэ"
                         value={g.name}
                         onChange={(e) => updateGuardian(idx, "name", e.target.value)}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                       />
                     </div>
 
@@ -523,7 +523,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                         placeholder="81000011"
                         value={g.phone}
                         onChange={(e) => updateGuardian(idx, "phone", e.target.value)}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                       />
                     </div>
 
@@ -534,7 +534,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                         placeholder="Жишээ: Эмч"
                         value={g.profession}
                         onChange={(e) => updateGuardian(idx, "profession", e.target.value)}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500"
                       />
                     </div>
 
@@ -543,7 +543,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                       <select required={publicRegistration}
                         value={g.relation}
                         onChange={(e) => updateGuardian(idx, "relation", e.target.value)}
-                        className="w-full bg-[#131316] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
+                        className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500"
                       >
                         <option value="Аав">Аав</option>
                         <option value="Ээж">Ээж</option>
@@ -574,7 +574,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
                       formData.status === "PAID"
                         ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                        : "bg-[#131316] border-zinc-700 text-zinc-400"
+                        : "bg-[var(--club-raised)] border-zinc-700 text-zinc-400"
                     }`}
                   >
                     <CheckCircle2 size={15} /> Төлсөн
@@ -585,7 +585,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
                     className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
                       formData.status === "UNPAID"
                         ? "bg-rose-500/20 border-rose-500 text-rose-400"
-                        : "bg-[#131316] border-zinc-700 text-zinc-400"
+                        : "bg-[var(--club-raised)] border-zinc-700 text-zinc-400"
                     }`}
                   >
                     ✕ Төлөөгүй

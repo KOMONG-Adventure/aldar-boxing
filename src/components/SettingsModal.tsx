@@ -81,7 +81,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                   type="text"
                   value={form.clubName}
                   onChange={(e) => setForm({ ...form, clubName: e.target.value })}
-                  className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
                 />
               </div>
 
@@ -91,7 +91,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                   type="text"
                   value={form.coachName}
                   onChange={(e) => setForm({ ...form, coachName: e.target.value })}
-                  className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
                 />
               </div>
 
@@ -103,7 +103,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                     type="number"
                     value={form.monthlyFee}
                   readOnly
-                    className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 pl-9 pr-3 text-white focus:outline-none focus:border-red-500"
+                    className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 pl-9 pr-3 text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
               </div>
@@ -115,7 +115,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                     type="time"
                     value={form.gymOpenTime}
                     onChange={(e) => setForm({ ...form, gymOpenTime: e.target.value })}
-                    className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                    className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
                 <div>
@@ -124,7 +124,7 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                     type="time"
                     value={form.gymCloseTime}
                     onChange={(e) => setForm({ ...form, gymCloseTime: e.target.value })}
-                    className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                    className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
               </div>

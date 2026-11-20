@@ -256,7 +256,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
               <button
                 onClick={exportToExcel}
                 title="Excel татах"
-                className="px-3 py-2.5 bg-[#17171c] hover:bg-zinc-800 border border-zinc-700/80 rounded-2xl text-xs font-semibold text-zinc-300 flex items-center gap-1.5 transition shrink-0"
+                className="px-3 py-2.5 bg-[var(--club-raised)] hover:bg-zinc-800 border border-zinc-700/80 rounded-2xl text-xs font-semibold text-zinc-300 flex items-center gap-1.5 transition shrink-0"
               >
                 <FileSpreadsheet size={16} className="text-emerald-400" />
                 <span className="hidden sm:inline">Excel</span>
@@ -321,7 +321,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                   return (
                     <div
                       key={m.id}
-                      className="bg-[var(--club-panel)] hover:bg-[#16161a] transition border border-zinc-800/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 group"
+                      className="bg-[var(--club-panel)] hover:bg-[var(--club-raised)] transition border border-zinc-800/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 group"
                     >
                       <div 
                         onClick={() => setSelectedMember(m)}

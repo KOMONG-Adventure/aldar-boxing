@@ -16,6 +16,7 @@ const accents = [
   { id: "indigo", label: "Индиго", color: "#4338ca" },
 ];
 const backgrounds = [
+  { id: "white", label: "Цагаан", color: "#ffffff" },
   { id: "black", label: "Хар", color: "#09090b" },
   { id: "slate", label: "Хөх саарал", color: "#0d1422" },
   { id: "warm", label: "Дулаан саарал", color: "#171310" },

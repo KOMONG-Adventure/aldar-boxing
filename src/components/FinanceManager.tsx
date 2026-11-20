@@ -191,7 +191,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
                   placeholder="Жишээ: Сарын төлбөр, Түрээс, Бээлий"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
                 />
               </div>
 
@@ -203,7 +203,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
                   placeholder="150000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-red-500"
                 />
               </div>
 
@@ -214,7 +214,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
                     type="text"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                    className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
                 <div>
@@ -223,7 +223,7 @@ export default function FinanceManager({ financials, monthlyFee, onRefresh }: Fi
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-[#1b1b1e] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
+                    className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500"
                   />
                 </div>
               </div>
