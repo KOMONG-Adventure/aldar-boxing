@@ -79,7 +79,7 @@ export default function TeacherLogin({ invite }: { invite: string }) {
             name="password"
             type="password"
             required
-            minLength={invite ? 10 : 1}
+            minLength={invite ? 10 : undefined}
             maxLength={128}
             autoComplete={invite ? "new-password" : "current-password"}
             className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 p-3"
