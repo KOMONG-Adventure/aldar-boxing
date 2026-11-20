@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { SessionItem, Member, AttendanceRecord } from "@/lib/db";
 import AddSessionModal from "./AddSessionModal";
+import AttendanceReport from "./AttendanceReport";
 import { billingToday } from "@/lib/billing";
 import { scheduleSummary, sessionSlots, slotsOnDate } from "@/lib/schedules";
 
@@ -175,6 +176,7 @@ export default function AttendanceManager({
 
   return (
     <div className="space-y-4">
+      <AttendanceReport date={selectedDate || todayStr} attendances={attendances} />
       {/* 1. ОГНОО СОНГОХ СЭЛГЭГЧ (Date Switcher - Gymdesk style) */}
       <div className="bg-[#121215] border border-zinc-800 rounded-3xl p-3 sm:p-4 flex items-center justify-between shadow-lg">
         <button
