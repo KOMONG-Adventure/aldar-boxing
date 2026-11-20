@@ -2,6 +2,15 @@ export const STANDARD_MONTHLY_FEE = 100000;
 export const SIBLING_MONTHLY_FEE = 50000;
 export const PAYMENT_PERIODS = [1, 2, 3, 6] as const;
 export const PAYMENT_WARNING_DAYS = 5;
+export const DEFAULT_PAYMENT_DUE_DAY = 20;
+
+export function monthlyDueDate(date: string, dueDay: number, months = 0): string {
+  if (!date || paymentEndDate(date, 0) !== date) return "";
+  const [year, month] = date.split("-").map(Number);
+  const targetMonth = month - 1 + months;
+  const lastDay = new Date(Date.UTC(year, targetMonth + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(year, targetMonth, Math.min(dueDay, lastDay))).toISOString().slice(0, 10);
+}
 
 export function billingToday(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ulaanbaatar" }).format(new Date());

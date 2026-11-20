@@ -108,6 +108,18 @@ export default function SettingsModal({ settings, onRefresh, disabled = false }:
                 </div>
               </div>
 
+              <div>
+                <label htmlFor="payment-due-day" className="mb-1.5 block font-medium text-zinc-300">Сар бүр төлбөр хураах өдөр</label>
+                <select id="payment-due-day" value={form.paymentDueDay}
+                  onChange={event => setForm({ ...form, paymentDueDay: Number(event.target.value) })}
+                  className="w-full rounded-xl border border-zinc-700/80 bg-[var(--club-raised)] px-3 py-2.5 text-white">
+                  {Array.from({ length: 31 }, (_, index) => index + 1).map(day => (
+                    <option key={day} value={day}>{day}</option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-zinc-400">Сонгосон өдөр тухайн сард байхгүй бол сарын сүүлийн өдөр хураана.</p>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-zinc-300 font-medium mb-1.5 block">Нээх цаг</label>

@@ -1,11 +1,11 @@
-import { studentPaymentState } from "@/lib/billing";
+import { billingToday, DEFAULT_PAYMENT_DUE_DAY, monthlyDueDate, paymentEndDate, studentPaymentState } from "@/lib/billing";
 import { authorizeTeacher, teacherAccess } from "@/lib/teacher-auth";
 import { getStudentAppData as getDbData, saveMemberRegistration as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { studentFields } from "@/lib/student-fields";
 import type { Member } from "@/lib/db";
-import { SupabaseConfigurationError } from '@/lib/supabase/server';
+import { getSupabaseAdmin, SupabaseConfigurationError } from '@/lib/supabase/server';
 
 function memberForTeacher(member: Member, canManageFinance: boolean) {
   if (canManageFinance) return member;
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       lastName, name, phone, birthDate, registerNumber, 
       gender, level, joinedDate, weight, height, 
       familyCount, bloodType, district, addressDetail, 
-      guardians, status, paymentDate, expireDate,
+      guardians, status, paymentDate,
       assignedSessionIds, avatarUrl 
     } = body;
 
@@ -58,6 +58,18 @@ export async function POST(request: Request) {
     const defaultCartoonAvatar = avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 
     const data = await getDbData();
+    const paid = canManageFinance && (status === undefined || status === "PAID");
+    const paidOn = paid
+      ? (typeof paymentDate === "string" && paymentEndDate(paymentDate, 0) ? paymentDate : billingToday())
+      : "";
+    let expiry = "";
+    if (paid) {
+      const { data: config, error } = await getSupabaseAdmin().from("app_settings").select("value").eq("id", true).maybeSingle();
+      if (error) throw error;
+      const configuredDay = config?.value?.paymentDueDay;
+      const dueDay = Number.isInteger(configuredDay) && configuredDay >= 1 && configuredDay <= 31 ? configuredDay : DEFAULT_PAYMENT_DUE_DAY;
+      expiry = monthlyDueDate(paidOn, dueDay, 1);
+    }
     const newMemberId = "m_" + randomUUID();
     const newMember: Member = {
       id: newMemberId,
@@ -76,9 +88,9 @@ export async function POST(request: Request) {
       district: district || "",
       addressDetail: addressDetail || "",
       guardians: guardians || [],
-      status: canManageFinance ? status || "PAID" : "UNPAID",
-      paymentDate: canManageFinance ? paymentDate || new Date().toISOString().split('T')[0] : "",
-      expireDate: canManageFinance ? expireDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : "",
+      status: paid ? "PAID" : "UNPAID",
+      paymentDate: paidOn,
+      expireDate: expiry,
       createdAt: new Date().toISOString().split('T')[0],
       attendancesCount: 0,
       avatarUrl: defaultCartoonAvatar,

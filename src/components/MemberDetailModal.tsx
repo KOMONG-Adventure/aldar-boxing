@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import { Member, FightRecord, PaymentHistoryItem } from "@/lib/db";
 import SiblingBilling from "./SiblingBilling";
-import { billingToday, paymentEndDate, studentPaymentState } from "@/lib/billing";
+import { billingToday, monthlyDueDate, studentPaymentState } from "@/lib/billing";
 
 interface MemberDetailModalProps {
+  paymentDueDay: number;
   canManageFinance: boolean;
   initialTab?: "profile" | "payments" | "card";
   member: Member;
@@ -22,7 +23,7 @@ interface MemberDetailModalProps {
   onRefresh: () => void;
 }
 
-export default function MemberDetailModal({ member, members, onClose, onRefresh, canManageFinance, initialTab = "profile" }: MemberDetailModalProps) {
+export default function MemberDetailModal({ member, members, onClose, onRefresh, canManageFinance, paymentDueDay, initialTab = "profile" }: MemberDetailModalProps) {
   const [activeTab, setActiveTab] = useState<"profile" | "payments" | "card" | "fights">(initialTab);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -42,10 +43,10 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
   const [paymentFormData, setPaymentFormData] = useState(() => ({
     periodMonths: 1,
     startDate: billingToday(),
-    expireDate: paymentEndDate(billingToday(), 1),
     method: "Дансаар (Хаан банк)",
     note: "",
   }));
+  const paymentExpiry = monthlyDueDate(paymentFormData.startDate, paymentDueDay, paymentFormData.periodMonths);
 
   // Засах өгөгдлийн төлөв
   const [editForm, setEditForm] = useState({
@@ -121,7 +122,6 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
     setPaymentFormData({
       ...paymentFormData,
       periodMonths: months,
-      expireDate: paymentEndDate(paymentFormData.startDate, months),
     });
   };
 
@@ -443,7 +443,6 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                           setPaymentFormData({
                             ...paymentFormData,
                             startDate: e.target.value,
-                            expireDate: paymentEndDate(e.target.value, paymentFormData.periodMonths),
                           });
                         }}
                         className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs"
@@ -454,7 +453,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                       <input
                         type="date"
                         required
-                        value={paymentFormData.expireDate}
+                        value={paymentExpiry}
                         readOnly
                         className="w-full bg-[var(--club-raised)] border border-zinc-700/80 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-red-500 text-xs font-semibold"
                       />
@@ -476,7 +475,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                   {paymentError && <p role="alert" className="text-xs text-red-400">{paymentError}</p>}
                   <button
                     type="submit"
-                    disabled={paymentSubmitting || billingPending || !paymentFormData.expireDate}
+                    disabled={paymentSubmitting || billingPending || !paymentExpiry}
                     className="w-full py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition text-xs flex items-center justify-center gap-1.5"
                   >
                     <Banknote size={15} />

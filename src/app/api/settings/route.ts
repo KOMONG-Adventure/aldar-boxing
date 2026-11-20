@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     if (settings.error || notifications.error)
       throw settings.error || notifications.error;
     return NextResponse.json({
-      settings: settings.data?.value || getDbData().settings,
+      settings: { ...getDbData().settings, ...settings.data?.value },
       notifications: notifications.data,
     });
   } catch (error) {
@@ -54,12 +54,16 @@ export async function POST(request: Request) {
         s.gymOpenTime >= s.gymCloseTime
       )
         throw new Error("Клубын нэр, ажиллах цагийг шалгана уу.");
+      if (!Number.isInteger(s.paymentDueDay) || s.paymentDueDay < 1 || s.paymentDueDay > 31) {
+        throw new Error("Төлбөрийн өдрийг 1–31-ээс сонгоно уу.");
+      }
       const value = {
         clubName: s.clubName.trim(),
         coachName: s.coachName.trim(),
         gymOpenTime: s.gymOpenTime,
         gymCloseTime: s.gymCloseTime,
         monthlyFee: 100000,
+        paymentDueDay: s.paymentDueDay,
         smsNotification: s.smsNotification === true,
         currency: "₮",
       };

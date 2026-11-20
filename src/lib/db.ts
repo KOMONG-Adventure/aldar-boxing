@@ -107,6 +107,7 @@ export interface AppNotification {
 }
 
 export interface AppSettings {
+  paymentDueDay: number;
   clubName: string;
   coachName: string;
   monthlyFee: number;
@@ -141,7 +142,7 @@ export function getDbData(): AppData {
   return {
     members: [], sessions: [], attendances: [], notifications: [], financials: [],
     settings: {
-      clubName: "ALDAR BOXING CLUB", coachName: "", monthlyFee: 100000,
+      clubName: "ALDAR BOXING CLUB", coachName: "", monthlyFee: 100000, paymentDueDay: 20,
       gymOpenTime: "07:00", gymCloseTime: "22:00", smsNotification: false, currency: "₮",
     },
   };

@@ -13,7 +13,7 @@ import AttendanceManager from "@/components/AttendanceManager";
 import PaymentOverview from "@/components/PaymentOverview";
 import FinanceManager from "@/components/FinanceManager";
 import * as XLSX from "xlsx";
-import { billingToday, paymentEndDate, studentPaymentState } from "@/lib/billing";
+import { billingToday, DEFAULT_PAYMENT_DUE_DAY, monthlyDueDate, paymentEndDate, studentPaymentState } from "@/lib/billing";
 import { 
   Users, Calendar, CreditCard, Search,
   Trash2, CheckCircle2, AlertCircle, Clock,
@@ -33,6 +33,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
     clubName: "ALDAR BOXING CLUB",
     coachName: "",
     monthlyFee: 100000,
+    paymentDueDay: DEFAULT_PAYMENT_DUE_DAY,
     gymOpenTime: "07:00",
     gymCloseTime: "22:00",
     smsNotification: false,
@@ -163,6 +164,8 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
   });
 
   const today = billingToday();
+  const thisMonthDue = monthlyDueDate(today, settings.paymentDueDay);
+  const nextDue = thisMonthDue < today ? monthlyDueDate(today, settings.paymentDueDay, 1) : thisMonthDue;
   const paidCount = members.filter(m => (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m, today).kind) : m.status === "PAID")).length;
   const unpaidCount = members.length - paidCount;
 
@@ -429,6 +432,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
                           </span>
                         )}
                         {lastExpiry && <span className="text-right text-[10px] text-zinc-400">Дууссан огноо {lastExpiry}</span>}
+                        {canManageFinance && !isPaid && <span className="text-right text-[10px] text-zinc-400">Дараагийн хураах өдөр {nextDue}</span>}
                         </div>
                         
                         {canManageFinance && <button
@@ -482,6 +486,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
           member={selectedMember}
           canManageFinance={canManageFinance}
           initialTab={memberTab}
+          paymentDueDay={settings.paymentDueDay}
           members={members}
           onClose={() => { setSelectedMember(null); setMemberTab("profile"); }}
 
