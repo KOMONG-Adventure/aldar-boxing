@@ -66,6 +66,7 @@ export async function POST(request: Request) {
       );
     }
     if (body.action === "setup") {
+      const existingTeacher = await getTeacher();
       if (
         typeof body.invite !== "string" ||
         !/^[a-f0-9]{64}$/.test(body.invite)
@@ -109,6 +110,7 @@ export async function POST(request: Request) {
         await client.auth.admin.deleteUser(data.user.id);
         throw new Error("Урилга эсвэл нэвтрэх нэр ашиглагдсан байна.");
       }
+      if (existingTeacher) return NextResponse.json({ success: true });
     }
     const { data: profile } = await client
       .from("teacher_profiles")

@@ -5,13 +5,14 @@ export default function TeacherLogin({ invite }: { invite: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
+    if (invite) return;
     fetch("/api/teacher")
       .then((r) => r.json())
       .then((data) => {
         if (data.teacher) window.location.replace("/");
       })
       .catch(() => setError("Сервертэй холбогдож чадсангүй."));
-  }, []);
+  }, [invite]);
   return (
     <main className="min-h-screen bg-[#09090b] text-white grid place-items-center p-4">
       <form

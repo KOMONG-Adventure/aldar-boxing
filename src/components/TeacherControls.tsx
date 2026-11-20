@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { LogOut, UserPlus, X, Copy } from "lucide-react";
 
-export default function TeacherControls({ action }: { action: "invite" | "logout" }) {
+export default function TeacherControls({ action, compact = false }: { action: "invite" | "logout"; compact?: boolean }) {
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -34,10 +34,12 @@ export default function TeacherControls({ action }: { action: "invite" | "logout
         type="button"
         disabled={busy}
         onClick={run}
-        className="w-full flex items-center gap-2 rounded-2xl border border-zinc-700 px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"
+        aria-label="Багш нэмэх"
+        title="Багш нэмэх"
+        className={compact ? "p-2 text-zinc-400 hover:text-white disabled:opacity-50" : "w-full flex items-center gap-2 rounded-2xl border border-zinc-700 px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"}
       >
         <UserPlus size={18} />
-        Багш нэмэх
+        {!compact && "Багш нэмэх"}
       </button> :
       <button
         type="button"
@@ -88,6 +90,9 @@ export default function TeacherControls({ action }: { action: "invite" | "logout
               <Copy size={16} />
               {copied ? "Хууллаа" : "Холбоос хуулах"}
             </button>
+            <a href={link} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-zinc-700 p-3 text-center text-sm hover:bg-zinc-800">
+              Бүртгэлийн хуудас нээх
+            </a>
           </div>
         </div>
       , document.body)}
