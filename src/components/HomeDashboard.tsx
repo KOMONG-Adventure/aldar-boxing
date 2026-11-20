@@ -169,7 +169,7 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
           
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <Image src="/aldar-club-logo.webp" width={44} height={44} alt="" unoptimized
-              className="h-11 w-11 shrink-0 rounded-xl bg-white object-contain" />
+              className="h-11 w-11 shrink-0 object-contain" />
             <div className="min-w-0">
               <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-white">
                 {settings.clubName}
