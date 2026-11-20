@@ -698,9 +698,9 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
             <div className="space-y-4">
               <div 
                 id="member-club-card" 
-                className="print-student-card bg-gradient-to-br from-[#1c1c22] via-[#121215] to-[#09090b] border-2 border-red-600/40 rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden"
+                className="print-student-card border border-red-600/40 rounded-2xl p-5 text-center relative overflow-hidden"
               >
-                <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
+                <div className="student-card-header flex flex-wrap gap-2 justify-between items-center pb-3 border-b border-zinc-800">
                   <div className="text-left">
                     <span className="text-[10px] uppercase tracking-widest text-red-500 font-extrabold block">ALDAR BOXING CLUB</span>
                     <h4 className="text-sm font-black text-white">ГИШҮҮНИЙ ҮНЭМЛЭХ</h4>
@@ -714,7 +714,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                   </span>
                 </div>
 
-                <div className="py-4 flex justify-center">
+                <div className="student-card-code py-4 flex justify-center">
                   {qrDataUrl && (
                     <div className="p-3 bg-white rounded-2xl shadow-xl inline-block">
                       <img src={qrDataUrl} alt="Member QR" className="w-36 h-36" />
@@ -722,14 +722,14 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                   )}
                 </div>
 
-                <div className="text-center">
+                <div className="student-card-holder text-center">
                   <h3 className="text-base font-black text-white">
                     {editForm.lastName ? `${editForm.lastName} ` : ""}{editForm.name}
                   </h3>
                   <p className="text-xs text-red-400 font-semibold">{editForm.level} • {editForm.phone}</p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-zinc-800/80 flex justify-between items-center text-[11px]">
+                <div className="student-card-footer mt-4 pt-3 border-t border-zinc-800/80 flex justify-between items-center text-[11px]">
                   {canManageFinance && <div>
                     <span className="text-[9px] text-zinc-500 block uppercase">Хүчинтэй хугацаа</span>
                     <span className="text-[11px] font-bold text-white">{editForm.expireDate || "-"}</span>

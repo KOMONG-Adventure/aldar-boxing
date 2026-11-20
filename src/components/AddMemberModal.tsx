@@ -220,10 +220,10 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
       {/* --- Бүртгэлийн том Попап (Modal Dialog) --- */}
       {isOpen && (
         <div className={publicRegistration ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"}>
-          <div className={`bg-[var(--club-panel)] border border-zinc-800 rounded-3xl w-full max-w-lg mx-auto text-white shadow-2xl relative flex flex-col overflow-hidden ${publicRegistration ? "" : "max-h-[92vh]"}`}>
+          <div className={`registration-panel bg-[var(--club-panel)] border border-zinc-800 rounded-3xl w-full max-w-lg mx-auto text-white shadow-2xl relative flex flex-col overflow-hidden ${publicRegistration ? "" : "max-h-[92dvh]"}`}>
             
             {/* Толгой хэсэг */}
-            <div className="flex justify-between items-center px-6 py-4 border-b border-zinc-800/80 shrink-0 bg-[#161619]">
+            <div className="registration-heading flex justify-between items-center px-6 py-4 border-b border-zinc-800/80 shrink-0 bg-[var(--club-raised)]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-rose-600/20 text-rose-500 rounded-2xl flex items-center justify-center border border-rose-500/30">
                   <Dumbbell size={20} />

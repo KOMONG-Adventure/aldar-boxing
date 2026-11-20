@@ -187,6 +187,63 @@
   border-radius: 50%;
 }
 
+.card-preview {
+  width: 100%;
+  height: 52px;
+  display: grid;
+  grid-template-rows: 1fr 2fr;
+  justify-items: center;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid var(--color-red-700);
+  border-radius: 7px;
+  padding: 7px;
+  background: var(--club-raised);
+}
+.card-preview b { width: 55%; height: 3px; background: var(--color-red-400); }
+.card-preview em { width: 16px; height: 16px; background: #fff; border-radius: 2px; }
+.card-preview[data-preview="stripe"] { border-top: 5px solid var(--color-red-500); }
+.card-preview[data-preview="split"] { grid-template: 1fr / 1fr 1fr; }
+.card-preview[data-preview="paper"] { background: #f7f3ea; }
+.card-preview[data-preview="paper"] em { border: 1px solid #444; }
+.card-preview[data-preview="ticket"] { border-style: dashed; border-radius: 2px; }
+
+.print-student-card { background: var(--club-raised); }
+[data-card="stripe"] .print-student-card {
+  border-top: 8px solid var(--color-red-500);
+  background: linear-gradient(135deg, var(--color-red-950), var(--club-raised) 65%);
+}
+[data-card="split"] .print-student-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+}
+[data-card="split"] .student-card-header,
+[data-card="split"] .student-card-footer { grid-column: 1 / -1; }
+[data-card="split"] .student-card-holder { grid-column: 1; grid-row: 2; overflow-wrap: anywhere; text-align: left; }
+[data-card="split"] .student-card-code { grid-column: 2; grid-row: 2; }
+[data-card="split"] .student-card-code img { width: 100%; height: auto; max-width: 144px; }
+[data-card="paper"] .print-student-card {
+  background: #f7f3ea;
+  border-color: #b6aa98;
+  color: #28231f;
+}
+[data-card="paper"] .print-student-card :is(.text-white, .text-red-400, .text-red-500, .text-zinc-500) { color: #3c2923; }
+[data-card="paper"] .print-student-card .text-emerald-400 { color: #065f46; }
+[data-card="ticket"] .print-student-card { border-style: dashed; border-radius: 6px; }
+[data-card="ticket"] .student-card-footer { border-top: 1px dashed var(--color-red-400); }
+
+[data-registration="compact"] .registration-panel { max-width: 28rem; border-radius: 1rem; }
+[data-registration="compact"] .registration-panel form { padding: 1rem; }
+[data-registration="compact"] .registration-panel form > :not(:last-child) { margin-block-end: 1rem; }
+[data-registration="compact"] .registration-heading { padding: .75rem 1rem; }
+[data-registration="wide"] .registration-panel { max-width: 50rem; }
+[data-registration="wide"] .registration-heading { border-top: 4px solid var(--color-red-500); }
+@media (min-width: 640px) {
+  [data-registration="wide"] .registration-panel form { padding-inline: 2rem; }
+}
+
 .club-navigation {
   position: fixed;
   z-index: 40;

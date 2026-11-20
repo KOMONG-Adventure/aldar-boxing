@@ -24,11 +24,26 @@ const backgrounds = [
   { id: "graphite", label: "Графит", color: "#161719" },
 ];
 
-function applyAppearance(accent: string, background: string) {
+const cards = [
+  { id: "classic", label: "Сонгодог" },
+  { id: "stripe", label: "Спорт" },
+  { id: "split", label: "Хажуугийн QR" },
+  { id: "paper", label: "Цаасан үнэмлэх" },
+  { id: "ticket", label: "Тасалбар" },
+];
+const registrations = [
+  { id: "classic", label: "Сонгодог" },
+  { id: "compact", label: "Нягт" },
+  { id: "wide", label: "Өргөн" },
+];
+
+function applyAppearance(accent: string, background: string, card: string, registration: string) {
   document.documentElement.dataset.accent = accent;
   document.documentElement.dataset.surface = background;
+  document.documentElement.dataset.card = card;
+  document.documentElement.dataset.registration = registration;
   try {
-    localStorage.setItem("aldar-appearance", JSON.stringify({ accent, background }));
+    localStorage.setItem("aldar-appearance", JSON.stringify({ accent, background, card, registration }));
   } catch {
     // The current page still reflects the selection when storage is unavailable.
   }
@@ -41,9 +56,11 @@ export function RestoreAppearance() {
       applyAppearance(
         accents.some(item => item.id === saved.accent) ? saved.accent : "red",
         backgrounds.some(item => item.id === saved.background) ? saved.background : "black",
+        cards.some(item => item.id === saved.card) ? saved.card : "classic",
+        registrations.some(item => item.id === saved.registration) ? saved.registration : "classic",
       );
     } catch {
-      applyAppearance("red", "black");
+      applyAppearance("red", "black", "classic", "classic");
     }
   }, []);
   return null;
@@ -53,26 +70,51 @@ export default function AppearanceControl() {
   const panel = useRef<HTMLDialogElement>(null);
   const [accent, setAccent] = useState("red");
   const [background, setBackground] = useState("black");
+  const [card, setCard] = useState("classic");
+  const [registration, setRegistration] = useState("classic");
 
   return <>
-    <button type="button" aria-label="Өнгө, дэвсгэр тохируулах" title="Өнгө, дэвсгэр тохируулах"
+    <button type="button" aria-label="Харагдац тохируулах" title="Харагдац тохируулах"
       className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white"
       onClick={() => {
         setAccent(document.documentElement.dataset.accent || "red");
         setBackground(document.documentElement.dataset.surface || "black");
+        setCard(document.documentElement.dataset.card || "classic");
+        setRegistration(document.documentElement.dataset.registration || "classic");
         panel.current?.showModal();
       }}>
       <Palette size={18} />
     </button>
     <dialog ref={panel} aria-labelledby="appearance-title"
       className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl border border-zinc-700 bg-[var(--club-panel)] p-5 text-white backdrop:bg-black/75">
-      <h2 id="appearance-title" className="mb-5 text-lg font-bold">Өнгө ба дэвсгэр</h2>
+      <h2 id="appearance-title" className="mb-5 text-lg font-bold">Харагдац</h2>
+      <fieldset className="mb-5">
+        <legend className="mb-2 text-sm text-zinc-300">QR үнэмлэхийн загвар</legend>
+        <div className="grid grid-cols-2 gap-2">{cards.map(item =>
+          <button key={item.id} type="button" aria-pressed={card === item.id}
+            className="appearance-option flex-col items-start"
+            onClick={() => { setCard(item.id); applyAppearance(accent, background, item.id, registration); }}>
+            <i aria-hidden="true" data-preview={item.id} className="card-preview"><b /><em /></i>
+            {item.label}
+          </button>
+        )}</div>
+      </fieldset>
+      <fieldset className="mb-5">
+        <legend className="mb-2 text-sm text-zinc-300">Сурагч бүртгэх маягт</legend>
+        <div className="grid grid-cols-2 gap-2">{registrations.map(item =>
+          <button key={item.id} type="button" aria-pressed={registration === item.id}
+            className="appearance-option"
+            onClick={() => { setRegistration(item.id); applyAppearance(accent, background, card, item.id); }}>
+            {item.label}
+          </button>
+        )}</div>
+      </fieldset>
       <fieldset className="mb-5">
         <legend className="mb-2 text-sm text-zinc-300">Үндсэн өнгө</legend>
         <div className="grid grid-cols-2 gap-2">{accents.map(item =>
           <button key={item.id} type="button" aria-pressed={accent === item.id}
             className="appearance-option"
-            onClick={() => { setAccent(item.id); applyAppearance(item.id, background); }}>
+            onClick={() => { setAccent(item.id); applyAppearance(item.id, background, card, registration); }}>
             <span style={{ backgroundColor: item.color }} />{item.label}
           </button>
         )}</div>
@@ -82,7 +124,7 @@ export default function AppearanceControl() {
         <div className="grid grid-cols-2 gap-2">{backgrounds.map(item =>
           <button key={item.id} type="button" aria-pressed={background === item.id}
             className="appearance-option"
-            onClick={() => { setBackground(item.id); applyAppearance(accent, item.id); }}>
+            onClick={() => { setBackground(item.id); applyAppearance(accent, item.id, card, registration); }}>
             <span style={{ backgroundColor: item.color }} />{item.label}
           </button>
         )}</div>
