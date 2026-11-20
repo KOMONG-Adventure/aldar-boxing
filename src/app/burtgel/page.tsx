@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function RegistrationPage() {
   return (
-    <main className="min-h-screen bg-[#09090b] px-3 py-6 sm:px-4 sm:py-10">
+    <main className="min-h-screen bg-[var(--club-background)] px-3 py-6 sm:px-4 sm:py-10">
       <p className="mb-5 text-center text-sm font-extrabold tracking-wider text-white">ALDAR BOXING CLUB</p>
       <AddMemberModal publicRegistration />
     </main>

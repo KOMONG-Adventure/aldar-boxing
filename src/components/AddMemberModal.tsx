@@ -211,22 +211,12 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
   return (
     <>
       {/* --- Зураг дээрх улаан "+" товчлуур --- */}
-      {!publicRegistration && <div
-        onClick={openRegistration}
-        className="flex flex-col items-center gap-1.5 cursor-pointer group select-none"
-      >
-        <button
-          type="button"
-          aria-label="Шинэ гишүүн"
-          className="w-14 h-14 sm:w-16 sm:h-16 bg-rose-600 hover:bg-rose-700 active:scale-95 transition-all duration-200 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-600/30 text-white"
-        >
-          <Plus size={34} strokeWidth={2.8} />
+      {!publicRegistration && (
+        <button type="button" onClick={openRegistration}
+          className="flex min-h-11 items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+          <Plus size={17} /> Сурагч нэмэх
         </button>
-        <span className="text-zinc-200 text-xs font-medium tracking-tight group-hover:text-rose-400 transition-colors">
-          Шинэ гишүүн
-        </span>
-      </div>}
-
+      )}
       {/* --- Бүртгэлийн том Попап (Modal Dialog) --- */}
       {isOpen && (
         <div className={publicRegistration ? "w-full" : "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"}>

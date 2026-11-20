@@ -16,7 +16,7 @@ import { studentPaymentState } from "@/lib/billing";
 import { 
   Users, Calendar, CreditCard, Dumbbell, Search,
   Trash2, CheckCircle2, AlertCircle, Clock,
-  Sparkles, RefreshCw, ChevronRight, UserCheck,
+  RefreshCw, ChevronRight, UserCheck,
   FileSpreadsheet, QrCode, DollarSign, Trophy
 } from "lucide-react";
 import { Member, SessionItem, AttendanceRecord, AppNotification, AppSettings, FinancialLog } from "@/lib/db";
@@ -160,11 +160,11 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
   const unpaidCount = members.length - paidCount;
 
   return (
-    <div className="min-h-screen bg-[var(--club-background)] text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-[var(--club-background)] text-zinc-100 font-sans selection:bg-red-600 selection:text-white pb-24 lg:pb-8">
       
       {/* --- TOP HEADER --- */}
       <header className="sticky top-0 z-40 bg-[var(--club-background)]/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto flex flex-wrap items-center justify-between gap-y-2">
           
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <div className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center shadow-md shadow-red-600/30">
@@ -203,48 +203,29 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
       </header>
 
       {/* --- MAIN BODY --- */}
-      <main className="max-w-2xl mx-auto w-full px-4 pt-4 flex-1 space-y-4">
+      <main className="club-content mx-auto w-full max-w-3xl space-y-5 px-4 pt-5 sm:px-6 lg:max-w-none lg:px-10 lg:pt-8">
         {memberLoadError && <p role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{memberLoadError}</p>}
         
-        {/* Картууд: Статистик */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-[var(--club-panel)] border border-zinc-800/90 rounded-2xl p-3 flex flex-col justify-between">
-            <span className="text-[11px] font-medium text-zinc-400">Нийт сурагч</span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-xl sm:text-2xl font-black text-white">{members.length}</span>
-              <span className="text-[10px] text-zinc-500">хүн</span>
-            </div>
-          </div>
-          <div className="bg-[var(--club-panel)] border border-emerald-950/40 rounded-2xl p-3 flex flex-col justify-between">
-            <span className="text-[11px] font-medium text-emerald-400/80">Төлсөн</span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-xl sm:text-2xl font-black text-emerald-400">{paidCount}</span>
-              <span className="text-[10px] text-emerald-500/60">гишүүн</span>
-            </div>
-          </div>
-          <div className="bg-[var(--club-panel)] border border-red-950/40 rounded-2xl p-3 flex flex-col justify-between">
-            <span className="text-[11px] font-medium text-red-400/80">Төлөөгүй</span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-xl sm:text-2xl font-black text-red-400">{unpaidCount}</span>
-              <span className="text-[10px] text-red-500/60">гишүүн</span>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-5">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {{ members: "Сурагчид", schedule: "Хуваарь ба ирц", billing: "Төлбөрийн хяналт", finance: "Санхүү" }[activeTab]}
+          </h2>
+          {activeTab === "members" && <AddMemberModal canManageFinance={canManageFinance} onMemberAdded={fetchAllData} />}
         </div>
-
-        {/* Шинэ гишүүн нэмэх үндсэн улаан товчлуурын хэсэг */}
-        <div className="bg-gradient-to-r from-[#17171c] to-[#121215] border border-zinc-800 rounded-3xl p-4 flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-red-400 uppercase tracking-wider flex items-center gap-1">
-              <Sparkles size={13} /> Сурагчийн бүртгэл
-            </span>
-            <h2 className="text-base font-bold text-white mt-0.5">Шинэ сурагч бүртгэх</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">Хувийн мэдээлэл, профайл зураг</p>
-          </div>
-          <div className="flex-shrink-0 pl-2">
-            <AddMemberModal canManageFinance={canManageFinance} onMemberAdded={fetchAllData} />
-          </div>
-        </div>
-
+        {activeTab === "members" && (
+          <dl className="grid grid-cols-3 overflow-hidden rounded-2xl border border-zinc-800 bg-[var(--club-panel)] divide-x divide-zinc-800">
+            {[
+              ["Нийт сурагч", members.length, "text-white"],
+              ["Төлсөн", paidCount, "text-emerald-400"],
+              ["Төлөөгүй", unpaidCount, "text-amber-300"],
+            ].map(([label, count, color]) => (
+              <div key={label} className="p-3 sm:p-5">
+                <dt className="text-xs text-zinc-400">{label}</dt>
+                <dd className={`mt-2 text-2xl font-semibold tabular-nums sm:text-3xl ${color}`}>{loading ? "—" : count}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
         {/* --- ТАБ 1: ХУВААРЬ & ИРЦИЙН ШИНЭЧЛЭГДСЭН СИСТЕМ --- */}
         {activeTab === "schedule" && (
           <AttendanceManager
@@ -439,51 +420,18 @@ export default function Home({ canManageFinance }: { canManageFinance: boolean }
 
       </main>
 
-      {/* --- МОБАЙЛ BOTTOM NAVIGATION BAR --- */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--club-background)]/95 backdrop-blur-lg border-t border-zinc-800/80 py-2.5 px-4 sm:px-6">
-        <div className="max-w-md mx-auto flex justify-around items-center">
-          <button
-            onClick={() => setActiveTab("schedule")}
-            className={`flex flex-col items-center gap-1 transition ${
-              activeTab === "schedule" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <Calendar size={20} />
-            <span className="text-[10px]">Хуваарь & Ирц</span>
+      <nav aria-label="Үндсэн цэс" className="club-navigation">
+        {([
+          { id: "members", label: "Сурагчид", icon: Users, admin: false },
+          { id: "schedule", label: "Хуваарь ба ирц", icon: Calendar, admin: false },
+          { id: "billing", label: "Төлбөр", icon: CreditCard, admin: true },
+          { id: "finance", label: "Санхүү", icon: DollarSign, admin: true },
+        ] as const).filter(item => !item.admin || canManageFinance).map(({ id, label, icon: Icon }) => (
+          <button key={id} type="button" aria-current={activeTab === id ? "page" : undefined} onClick={() => setActiveTab(id)}>
+            <Icon size={20} /><span>{label}</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab("members")}
-            className={`flex flex-col items-center gap-1 transition ${
-              activeTab === "members" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <Users size={20} />
-            <span className="text-[10px]">Сурагчид</span>
-          </button>
-
-          {canManageFinance && <button
-            onClick={() => setActiveTab("billing")}
-            className={`flex flex-col items-center gap-1 transition ${
-              activeTab === "billing" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <CreditCard size={20} />
-            <span className="text-[10px]">Төлбөрийн хяналт</span>
-          </button>}
-
-          {canManageFinance && <button
-            onClick={() => setActiveTab("finance")}
-            className={`flex flex-col items-center gap-1 transition ${
-              activeTab === "finance" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <DollarSign size={20} />
-            <span className="text-[10px]">Санхүү & Касс</span>
-          </button>}
-        </div>
+        ))}
       </nav>
-
       {/* Сурагчийн дэлгэрэнгүй & QR Pass & Тулааны түүх модаль цонх */}
       {selectedMember && (
         <MemberDetailModal

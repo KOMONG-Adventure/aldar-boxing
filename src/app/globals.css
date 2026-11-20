@@ -60,6 +60,109 @@
   --color-rose-950: #2e1065;
 }
 
+:root[data-accent="cyan"] {
+  --color-red-300: #a5f3fc;
+  --color-rose-300: #a5f3fc;
+  --color-red-400: #67e8f9;
+  --color-rose-400: #67e8f9;
+  --color-red-500: #22d3ee;
+  --color-rose-500: #22d3ee;
+  --color-red-600: #0e7490;
+  --color-rose-600: #0e7490;
+  --color-red-700: #155e75;
+  --color-rose-700: #155e75;
+  --color-red-950: #083344;
+  --color-rose-950: #083344;
+}
+:root[data-accent="teal"] {
+  --color-red-300: #99f6e4;
+  --color-rose-300: #99f6e4;
+  --color-red-400: #5eead4;
+  --color-rose-400: #5eead4;
+  --color-red-500: #2dd4bf;
+  --color-rose-500: #2dd4bf;
+  --color-red-600: #0f766e;
+  --color-rose-600: #0f766e;
+  --color-red-700: #115e59;
+  --color-rose-700: #115e59;
+  --color-red-950: #042f2e;
+  --color-rose-950: #042f2e;
+}
+:root[data-accent="amber"] {
+  --color-red-300: #fde68a;
+  --color-rose-300: #fde68a;
+  --color-red-400: #fcd34d;
+  --color-rose-400: #fcd34d;
+  --color-red-500: #fbbf24;
+  --color-rose-500: #fbbf24;
+  --color-red-600: #a16207;
+  --color-rose-600: #a16207;
+  --color-red-700: #854d0e;
+  --color-rose-700: #854d0e;
+  --color-red-950: #451a03;
+  --color-rose-950: #451a03;
+}
+:root[data-accent="orange"] {
+  --color-red-300: #fed7aa;
+  --color-rose-300: #fed7aa;
+  --color-red-400: #fdba74;
+  --color-rose-400: #fdba74;
+  --color-red-500: #fb923c;
+  --color-rose-500: #fb923c;
+  --color-red-600: #c2410c;
+  --color-rose-600: #c2410c;
+  --color-red-700: #9a3412;
+  --color-rose-700: #9a3412;
+  --color-red-950: #431407;
+  --color-rose-950: #431407;
+}
+:root[data-accent="pink"] {
+  --color-red-300: #fbcfe8;
+  --color-rose-300: #fbcfe8;
+  --color-red-400: #f9a8d4;
+  --color-rose-400: #f9a8d4;
+  --color-red-500: #f472b6;
+  --color-rose-500: #f472b6;
+  --color-red-600: #be185d;
+  --color-rose-600: #be185d;
+  --color-red-700: #9d174d;
+  --color-rose-700: #9d174d;
+  --color-red-950: #500724;
+  --color-rose-950: #500724;
+}
+:root[data-accent="indigo"] {
+  --color-red-300: #c7d2fe;
+  --color-rose-300: #c7d2fe;
+  --color-red-400: #a5b4fc;
+  --color-rose-400: #a5b4fc;
+  --color-red-500: #818cf8;
+  --color-rose-500: #818cf8;
+  --color-red-600: #4338ca;
+  --color-rose-600: #4338ca;
+  --color-red-700: #3730a3;
+  --color-rose-700: #3730a3;
+  --color-red-950: #1e1b4b;
+  --color-rose-950: #1e1b4b;
+}
+:root[data-surface="forest"] {
+  --club-background: #101914;
+  --club-panel: #17231c;
+  --club-raised: #213128;
+  --color-zinc-800: #34473a;
+}
+:root[data-surface="plum"] {
+  --club-background: #181220;
+  --club-panel: #22192c;
+  --club-raised: #2c2139;
+  --color-zinc-800: #45344e;
+}
+:root[data-surface="graphite"] {
+  --club-background: #161719;
+  --club-panel: #202124;
+  --club-raised: #292b2f;
+  --color-zinc-800: #393c42;
+}
+
 .appearance-option {
   display: flex;
   align-items: center;
@@ -82,6 +185,70 @@
   flex: none;
   border: 1px solid #ffffff40;
   border-radius: 50%;
+}
+
+.club-navigation {
+  position: fixed;
+  z-index: 40;
+  inset: auto 0 0;
+  display: flex;
+  gap: .25rem;
+  padding: .5rem .75rem max(.5rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-zinc-800);
+  background: var(--club-panel);
+}
+.club-navigation button {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  border-radius: .75rem;
+  padding: .3rem;
+  color: var(--color-zinc-400);
+  font-size: .6875rem;
+  cursor: pointer;
+}
+.club-navigation button[aria-current="page"] {
+  background: color-mix(in srgb, var(--color-red-500) 14%, transparent);
+  color: var(--color-red-300);
+  font-weight: 600;
+}
+.club-navigation button:hover {
+  color: white;
+}
+button:focus-visible, a:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--color-red-400);
+  outline-offset: 3px;
+}
+@media (min-width: 1024px) {
+  .club-navigation {
+    inset: 73px auto 0 0;
+    width: 226px;
+    flex-direction: column;
+    border-top: 0;
+    border-right: 1px solid var(--color-zinc-800);
+    padding: 1.4rem .9rem;
+  }
+  .club-navigation button {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: .75rem;
+    padding: .65rem .85rem;
+    font-size: .875rem;
+  }
+  .club-content {
+    margin-left: 226px;
+    width: calc(100% - 226px);
+  }
+  .club-content > * {
+    max-width: 960px;
+    margin-inline: auto;
+  }
 }
 
 :root {
