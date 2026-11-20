@@ -7,7 +7,7 @@ import { billingToday } from "@/lib/billing";
 import { isScheduleDate } from "@/lib/schedules";
 
 export async function GET(request: Request) {
-  const denied = await teacherAccess(request);
+  const denied = await teacherAccess(request, true);
   if (denied) return denied;
   try {
     const logs = [];
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   }
 }
 export async function POST(request: Request) {
-  const denied = await teacherAccess(request);
+  const denied = await teacherAccess(request, true);
   if (denied) return denied;
   try {
     const body = await request.json();

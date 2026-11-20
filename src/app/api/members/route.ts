@@ -1,9 +1,18 @@
-import { teacherAccess } from "@/lib/teacher-auth";
+import { studentPaymentState } from "@/lib/billing";
+import { authorizeTeacher, teacherAccess } from "@/lib/teacher-auth";
 import { getStudentAppData as getDbData, saveMemberRegistration as saveDbData } from '@/lib/student-data';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
-import { Member } from '@/lib/db';
+import { studentFields } from "@/lib/student-fields";
+import type { Member } from "@/lib/db";
 import { SupabaseConfigurationError } from '@/lib/supabase/server';
+
+function memberForTeacher(member: Member, canManageFinance: boolean) {
+  if (canManageFinance) return member;
+  const { paymentHistory, monthlyFee, siblingId, ...profile } = member;
+  const { kind } = studentPaymentState(member);
+  return { ...profile, paymentDate: "", expireDate: "", status: kind === "active" || kind === "expiring" ? "PAID" : "UNPAID" };
+}
 
 function configurationErrorResponse(error: unknown) {
   if (error instanceof SupabaseConfigurationError) {
@@ -12,10 +21,11 @@ function configurationErrorResponse(error: unknown) {
 }
 
 export async function GET(request: Request) {
-  const denied = await teacherAccess(request); if (denied) return denied;
+  const teacher = await authorizeTeacher(request); if (teacher instanceof NextResponse) return teacher;
   try {
     const data = await getDbData();
-    return NextResponse.json(data.members, { headers: { 'Cache-Control': 'no-store' } });
+    const canManageFinance = teacher.role === "super_admin";
+    return NextResponse.json(data.members.map(member => memberForTeacher(member, canManageFinance)), { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     console.error('Student registration read failed', error);
     const configurationError = configurationErrorResponse(error);
@@ -25,8 +35,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const denied = await teacherAccess(request); if (denied) return denied;
+  const teacher = await authorizeTeacher(request); if (teacher instanceof NextResponse) return teacher;
   try {
+    const canManageFinance = teacher.role === "super_admin";
     const body = await request.json();
     const { 
       lastName, name, phone, birthDate, registerNumber, 
@@ -65,9 +76,9 @@ export async function POST(request: Request) {
       district: district || "",
       addressDetail: addressDetail || "",
       guardians: guardians || [],
-      status: status || "PAID",
-      paymentDate: paymentDate || new Date().toISOString().split('T')[0],
-      expireDate: expireDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: canManageFinance ? status || "PAID" : "UNPAID",
+      paymentDate: canManageFinance ? paymentDate || new Date().toISOString().split('T')[0] : "",
+      expireDate: canManageFinance ? expireDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : "",
       createdAt: new Date().toISOString().split('T')[0],
       attendancesCount: 0,
       avatarUrl: defaultCartoonAvatar,
@@ -100,7 +111,7 @@ export async function POST(request: Request) {
 
     await saveDbData(data);
 
-    return NextResponse.json(newMember, { status: 201 });
+    return NextResponse.json(memberForTeacher(newMember, canManageFinance), { status: 201 });
   } catch (error) {
     console.error('Student registration create failed', error);
     const configurationError = configurationErrorResponse(error);
@@ -110,7 +121,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const denied = await teacherAccess(request); if (denied) return denied;
+  const denied = await teacherAccess(request, true); if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -137,8 +148,9 @@ export async function DELETE(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const denied = await teacherAccess(request); if (denied) return denied;
+  const teacher = await authorizeTeacher(request); if (teacher instanceof NextResponse) return teacher;
   try {
+    const canManageFinance = teacher.role === "super_admin";
     const body = await request.json();
     const { id, status, expireDate, paymentDate, assignedSessionIds, ...updates } = body;
     if (!id) {
@@ -151,10 +163,13 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Гишүүн олдсонгүй" }, { status: 404 });
     }
 
-    Object.assign(target, updates);
-    if (status !== undefined) target.status = status;
-    if (expireDate !== undefined) target.expireDate = expireDate;
-    if (paymentDate !== undefined) target.paymentDate = paymentDate;
+    for (const field of [...Object.keys(studentFields), "avatarUrl"] as (keyof Member)[]) {
+      if (["status", "expireDate", "paymentDate"].includes(field)) continue;
+      if (Object.hasOwn(updates, field)) Object.assign(target, { [field]: updates[field] });
+    }
+    if (canManageFinance && status !== undefined) target.status = status;
+    if (canManageFinance && expireDate !== undefined) target.expireDate = expireDate;
+    if (canManageFinance && paymentDate !== undefined) target.paymentDate = paymentDate;
 
     // Хичээлийн хуваарилалтыг шинэчлэх
     if (assignedSessionIds !== undefined) {
@@ -170,7 +185,7 @@ export async function PATCH(request: Request) {
     }
 
     await saveDbData(data);
-    return NextResponse.json(target);
+    return NextResponse.json(memberForTeacher(target, canManageFinance));
   } catch (error) {
     const configurationError = configurationErrorResponse(error);
     if (configurationError) return configurationError;

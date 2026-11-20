@@ -42,7 +42,7 @@ export async function getTeacher(refresh = false) {
   if (error || !user) return null;
   const { data, error: profileError } = await getSupabaseAdmin()
     .from("teacher_profiles")
-    .select("user_id, username, name")
+    .select("user_id, username, name, role")
     .eq("user_id", user.id)
     .eq("enabled", true)
     .maybeSingle();
@@ -50,7 +50,7 @@ export async function getTeacher(refresh = false) {
   return data;
 }
 
-export async function teacherAccess(request: Request) {
+export async function authorizeTeacher(request: Request, adminOnly = false) {
   if (!["GET", "HEAD"].includes(request.method)) {
     const origin = request.headers.get("origin");
     if (origin && origin !== new URL(request.url).origin) {
@@ -60,11 +60,20 @@ export async function teacherAccess(request: Request) {
       );
     }
   }
-  if (!(await getTeacher(true))) {
+  const teacher = await getTeacher(true);
+  if (!teacher) {
     return NextResponse.json(
       { error: "Багшийн эрхээр нэвтэрнэ үү." },
       { status: 401 },
     );
   }
-  return null;
+  if (adminOnly && teacher.role !== "super_admin") {
+    return NextResponse.json({ error: "Супер админы эрх шаардлагатай." }, { status: 403 });
+  }
+  return teacher;
+}
+
+export async function teacherAccess(request: Request, adminOnly = false) {
+  const result = await authorizeTeacher(request, adminOnly);
+  return result instanceof NextResponse ? result : null;
 }

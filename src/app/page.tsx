@@ -4,8 +4,9 @@ import HomeDashboard from "@/components/HomeDashboard";
 import { getTeacher } from "@/lib/teacher-auth";
 
 async function TeacherDashboard() {
-  if (!(await getTeacher())) redirect("/bagsh");
-  return <HomeDashboard />;
+  const teacher = await getTeacher();
+  if (!teacher) redirect("/bagsh");
+  return <HomeDashboard canManageFinance={teacher.role === "super_admin"} />;
 }
 
 export default function Home() {

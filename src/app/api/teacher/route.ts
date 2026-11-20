@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
     if (body.action === "invite") {
-      const denied = await teacherAccess(request);
+      const denied = await teacherAccess(request, true);
       if (denied) return denied;
       const token = randomBytes(32).toString("hex");
       const { error } = await client

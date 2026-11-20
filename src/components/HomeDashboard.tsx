@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Member, SessionItem, AttendanceRecord, AppNotification, AppSettings, FinancialLog } from "@/lib/db";
 
-export default function Home() {
+export default function Home({ canManageFinance }: { canManageFinance: boolean }) {
   const [activeTab, setActiveTab] = useState<"members" | "schedule" | "billing" | "finance">("members");
   const [members, setMembers] = useState<Member[]>([]);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
@@ -53,14 +53,14 @@ export default function Home() {
       const [membersRes, attRes, settRes, finRes] = await Promise.all([
         fetch("/api/members"),
         fetch("/api/attendance"),
-        fetch("/api/settings"),
-        fetch("/api/financials")
+        canManageFinance ? fetch("/api/settings") : null,
+        canManageFinance ? fetch("/api/financials") : null
       ]);
-      if ([membersRes, attRes, settRes, finRes].some(response => response.status === 401)) {
+      if ([membersRes, attRes, settRes, finRes].some(response => response?.status === 401)) {
         window.location.replace("/bagsh");
         return;
       }
-      if ([attRes, settRes, finRes].some(response => !response.ok)) {
+      if ([attRes, settRes, finRes].some(response => response && !response.ok)) {
         throw new Error("Мэдээлэл шинэчлэхэд алдаа гарлаа.");
       }
 
@@ -77,12 +77,12 @@ export default function Home() {
         setSessions(attData.sessions || []);
         setAttendances(attData.allAttendances || attData.attendances || []);
       }
-      if (settRes.ok) {
+      if (settRes?.ok) {
         const settData = await settRes.json();
         setNotifications(settData.notifications || []);
         if (settData.settings) setSettings(settData.settings);
       }
-      if (finRes.ok) {
+      if (finRes?.ok) {
         const finData = await finRes.json();
         setFinancials(finData);
       }
@@ -113,9 +113,8 @@ export default function Home() {
       "Өндөр /см/": m.height || "",
       "Цусны бүлэг": m.bloodType || "",
       "Дүүрэг": m.district || "",
-      "Төлбөрийн төлөв": ["active", "expiring"].includes(studentPaymentState(m).kind) ? "Төлсөн" : "Төлөөгүй",
-      "Эхэлсэн огноо": m.paymentDate,
-      "Дуусах огноо": m.expireDate,
+      "Төлбөрийн төлөв": (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m).kind) : m.status === "PAID") ? "Төлсөн" : "Төлөөгүй",
+      ...(canManageFinance ? { "Эхэлсэн огноо": m.paymentDate, "Дуусах огноо": m.expireDate } : {}),
       "Ирцийн тоо": m.attendancesCount || 0,
       "Тулааны рекорд": `${m.fights?.filter(f => f.result === 'WIN').length || 0}W - ${m.fights?.filter(f => f.result === 'LOSS').length || 0}L`,
       "Асран хамгаалагч": m.guardians?.map(g => `${g.name} (${g.relation} - ${g.phone})`).join("; ") || ""
@@ -143,7 +142,7 @@ export default function Home() {
   };
 
   const filteredMembers = members.filter((m) => {
-    const paid = ["active", "expiring"].includes(studentPaymentState(m).kind);
+    const paid = (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m).kind) : m.status === "PAID");
     const fullName = `${m.lastName || ""} ${m.name}`.toLowerCase();
     const matchesQuery = fullName.includes(searchQuery.toLowerCase()) || m.phone.includes(searchQuery);
     const matchesLevel = filterLevel === "all" || m.level === filterLevel;
@@ -156,7 +155,7 @@ export default function Home() {
     return matchesQuery && matchesLevel && matchesPayment;
   });
 
-  const paidCount = members.filter(m => ["active", "expiring"].includes(studentPaymentState(m).kind)).length;
+  const paidCount = members.filter(m => (canManageFinance ? ["active", "expiring"].includes(studentPaymentState(m).kind) : m.status === "PAID")).length;
   const unpaidCount = members.length - paidCount;
 
   return (
@@ -178,7 +177,7 @@ export default function Home() {
           </div>
 
           <div className="flex shrink-0 items-center gap-0 sm:gap-2">
-            <TeacherControls />
+            <TeacherControls canInvite={canManageFinance} />
             <button
               onClick={fetchAllData}
               title="Шинэчлэх"
@@ -186,15 +185,15 @@ export default function Home() {
             >
               <RefreshCw size={17} className={loading ? "animate-spin text-red-500" : ""} />
             </button>
-            <NotificationsModal 
+            {canManageFinance && <NotificationsModal
               notifications={notifications} 
               onRefresh={fetchAllData} 
-            />
-            <SettingsModal 
+            />}
+            {canManageFinance && <SettingsModal
               settings={settings} 
               onRefresh={fetchAllData} 
               disabled={loading || !!memberLoadError}
-            />
+            />}
           </div>
 
         </div>
@@ -239,7 +238,7 @@ export default function Home() {
             <p className="text-xs text-zinc-400 mt-0.5">Хувийн мэдээлэл, профайл зураг</p>
           </div>
           <div className="flex-shrink-0 pl-2">
-            <AddMemberModal onMemberAdded={fetchAllData} />
+            <AddMemberModal canManageFinance={canManageFinance} onMemberAdded={fetchAllData} />
           </div>
         </div>
 
@@ -329,8 +328,8 @@ export default function Home() {
               ) : (
                 filteredMembers.map((m) => {
                   const paymentState = studentPaymentState(m);
-                  const isPaid = paymentState.kind === "active" || paymentState.kind === "expiring";
-                  const isExpired = paymentState.kind === "expired";
+                  const isPaid = canManageFinance ? paymentState.kind === "active" || paymentState.kind === "expiring" : m.status === "PAID";
+                  const isExpired = canManageFinance && paymentState.kind === "expired";
                   const fights = m.fights || [];
                   const wins = fights.filter(f => f.result === "WIN").length;
                   const losses = fights.filter(f => f.result === "LOSS").length;
@@ -387,7 +386,7 @@ export default function Home() {
                         </button>
 
                         <button
-                          onClick={() => { setMemberTab("payments"); setSelectedMember(m); }}
+                          disabled={!canManageFinance}
                           className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition flex items-center gap-1 ${
                             isPaid && !isExpired
                               ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
@@ -405,13 +404,13 @@ export default function Home() {
                           )}
                         </button>
                         
-                        <button
+                        {canManageFinance && <button
                           onClick={() => handleDeleteMember(m.id, m.name)}
                           className="p-1.5 text-zinc-500 hover:text-red-400 transition rounded-lg hover:bg-zinc-800"
                           title="Устгах"
                         >
                           <Trash2 size={16} />
-                        </button>
+                        </button>}
                       </div>
                     </div>
                   );
@@ -422,12 +421,12 @@ export default function Home() {
         )}
 
         {/* Төлбөрийн хугацааны хяналт */}
-        {activeTab === "billing" && (
+        {canManageFinance && activeTab === "billing" && (
           <PaymentOverview members={members} loading={loading} onPayment={member => { setMemberTab("payments"); setSelectedMember(member); }} />
         )}
 
         {/* --- ТАБ 4: САНХҮҮ & ТӨЛБӨРИЙН КАСС --- */}
-        {activeTab === "finance" && (
+        {canManageFinance && activeTab === "finance" && (
           <FinanceManager 
             financials={financials} 
             monthlyFee={settings.monthlyFee}
@@ -460,7 +459,7 @@ export default function Home() {
             <span className="text-[10px]">Сурагчид</span>
           </button>
 
-          <button
+          {canManageFinance && <button
             onClick={() => setActiveTab("billing")}
             className={`flex flex-col items-center gap-1 transition ${
               activeTab === "billing" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
@@ -468,9 +467,9 @@ export default function Home() {
           >
             <CreditCard size={20} />
             <span className="text-[10px]">Төлбөрийн хяналт</span>
-          </button>
+          </button>}
 
-          <button
+          {canManageFinance && <button
             onClick={() => setActiveTab("finance")}
             className={`flex flex-col items-center gap-1 transition ${
               activeTab === "finance" ? "text-red-500 font-bold" : "text-zinc-500 hover:text-zinc-300"
@@ -478,7 +477,7 @@ export default function Home() {
           >
             <DollarSign size={20} />
             <span className="text-[10px]">Санхүү & Касс</span>
-          </button>
+          </button>}
         </div>
       </nav>
 
@@ -486,6 +485,7 @@ export default function Home() {
       {selectedMember && (
         <MemberDetailModal
           member={selectedMember}
+          canManageFinance={canManageFinance}
           initialTab={memberTab}
           members={members}
           onClose={() => { setSelectedMember(null); setMemberTab("profile"); }}

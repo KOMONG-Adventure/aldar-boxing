@@ -4,7 +4,7 @@ import { teacherAccess } from "@/lib/teacher-auth";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-  const denied = await teacherAccess(request);
+  const denied = await teacherAccess(request, true);
   if (denied) return denied;
   try {
     const client = getSupabaseAdmin();
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
   }
 }
 export async function POST(request: Request) {
-  const denied = await teacherAccess(request);
+  const denied = await teacherAccess(request, true);
   if (denied) return denied;
   try {
     const body = await request.json();

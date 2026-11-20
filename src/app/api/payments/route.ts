@@ -5,7 +5,7 @@ import { getPayments, toPaymentHistory, type PaymentRow } from "@/lib/payment-da
 import { PAYMENT_PERIODS, paymentEndDate } from "@/lib/billing";
 
 export async function GET(request: Request) {
-  const denied = await teacherAccess(request); if (denied) return denied;
+  const denied = await teacherAccess(request, true); if (denied) return denied;
   const memberId = new URL(request.url).searchParams.get("memberId");
   if (!memberId) return NextResponse.json({ error: "memberId шаардлагатай" }, { status: 400 });
   try {
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const denied = await teacherAccess(request); if (denied) return denied;
+  const denied = await teacherAccess(request, true); if (denied) return denied;
   try {
     const body = await request.json();
     const { memberId, paymentId, periodMonths, startDate, method, note, expectedMonthlyFee, amount } = body;

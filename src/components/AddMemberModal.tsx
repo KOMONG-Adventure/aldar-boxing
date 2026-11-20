@@ -9,11 +9,12 @@ import { Guardian } from "@/lib/db";
 import { isPublicRegistrationComplete } from "@/lib/public-registration";
 
 interface AddMemberModalProps {
+  canManageFinance?: boolean;
   onMemberAdded?: () => void;
   publicRegistration?: boolean;
 }
 
-export default function AddMemberModal({ onMemberAdded, publicRegistration = false }: AddMemberModalProps) {
+export default function AddMemberModal({ onMemberAdded, publicRegistration = false, canManageFinance = false }: AddMemberModalProps) {
   const [isOpen, setIsOpen] = useState(publicRegistration);
   const [submitted, setSubmitted] = useState(false);
   const submissionId = useRef<string | null>(null);
@@ -574,7 +575,7 @@ export default function AddMemberModal({ onMemberAdded, publicRegistration = fal
               </div>
 
               {/* 3. ТӨЛБӨРИЙН СУУРЬ */}
-              {!publicRegistration && <div className="bg-[#18181c] p-4 rounded-2xl border border-zinc-800 space-y-3">
+              {!publicRegistration && canManageFinance && <div className="bg-[#18181c] p-4 rounded-2xl border border-zinc-800 space-y-3">
                 <label className="text-zinc-300 font-medium block">Төлбөрийн анхны төлөв</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button

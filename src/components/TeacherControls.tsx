@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { LogOut, UserPlus, X, Copy } from "lucide-react";
 
-export default function TeacherControls() {
+export default function TeacherControls({ canInvite }: { canInvite: boolean }) {
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -30,7 +30,7 @@ export default function TeacherControls() {
   };
   return (
     <>
-      <button
+      {canInvite && <button
         type="button"
         disabled={busy}
         onClick={() => run("invite")}
@@ -39,7 +39,7 @@ export default function TeacherControls() {
         className="p-2 text-zinc-400 hover:text-white disabled:opacity-50"
       >
         <UserPlus size={18} />
-      </button>
+      </button>}
       <button
         type="button"
         disabled={busy}

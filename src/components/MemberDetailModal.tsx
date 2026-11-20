@@ -14,6 +14,7 @@ import SiblingBilling from "./SiblingBilling";
 import { billingToday, paymentEndDate, studentPaymentState } from "@/lib/billing";
 
 interface MemberDetailModalProps {
+  canManageFinance: boolean;
   initialTab?: "profile" | "payments" | "card";
   member: Member;
   members: Member[];
@@ -21,7 +22,7 @@ interface MemberDetailModalProps {
   onRefresh: () => void;
 }
 
-export default function MemberDetailModal({ member, members, onClose, onRefresh, initialTab = "profile" }: MemberDetailModalProps) {
+export default function MemberDetailModal({ member, members, onClose, onRefresh, canManageFinance, initialTab = "profile" }: MemberDetailModalProps) {
   const [activeTab, setActiveTab] = useState<"profile" | "payments" | "card" | "fights">(initialTab);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -69,7 +70,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
 
   // Сунгалт, огнооны зөрүү тооцоолол
   const paymentState = studentPaymentState(editForm);
-  const isPaid = paymentState.kind === "active" || paymentState.kind === "expiring";
+  const isPaid = canManageFinance ? paymentState.kind === "active" || paymentState.kind === "expiring" : member.status === "PAID";
   const isExpired = paymentState.kind === "expired";
 
   const getDaysDiffText = () => {
@@ -297,7 +298,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
           <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
             {[
               { key: "profile", label: "Хувийн бүртгэл", icon: null },
-              { key: "payments", label: `Төлбөр (${paymentHistory.length})`, icon: <History size={13} /> },
+              ...(canManageFinance ? [{ key: "payments", label: `Төлбөр (${paymentHistory.length})`, icon: <History size={13} /> }] : []),
               { key: "fights", label: `${wins}W-${losses}L`, icon: <Trophy size={13} /> },
               { key: "card", label: "QR Үнэмлэх", icon: <QrCode size={13} /> },
             ].map((tab) => (
@@ -328,7 +329,7 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
         <div className="p-6 overflow-y-auto space-y-5 text-xs">
           
           {/* ================= 1. ТӨЛБӨРИЙН ТҮҮХ ТАБ ================= */}
-          {activeTab === "payments" && (
+          {canManageFinance && activeTab === "payments" && (
             <div className="space-y-4">
               
               {/* Одоогийн төлөв ба Шинэ төлбөр авах товч */}
@@ -729,10 +730,10 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-zinc-800/80 flex justify-between items-center text-[11px]">
-                  <div>
+                  {canManageFinance && <div>
                     <span className="text-[9px] text-zinc-500 block uppercase">Хүчинтэй хугацаа</span>
                     <span className="text-[11px] font-bold text-white">{editForm.expireDate || "-"}</span>
-                  </div>
+                  </div>}
                   <div>
                     <span className="text-[9px] text-zinc-500 block uppercase">Төлөв</span>
                     <span className="text-[11px] font-bold text-emerald-400">{getDaysDiffText() || "Төлөгдсөн"}</span>
@@ -774,19 +775,19 @@ export default function MemberDetailModal({ member, members, onClose, onRefresh,
                         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
                         : "bg-red-500/20 text-red-400 border-red-500/40"
                     }`}>
-                      {isPaid && !isExpired ? "✓ Төлбөр төлөгдсөн" : "✕ Төлбөр дууссан / Төлөөгүй"}
+                      {isPaid && !isExpired ? "✓ Төлбөр төлөгдсөн" : "✕ Төлбөр төлөгдөөгүй"}
                     </span>
-                    <span className="text-xs text-zinc-400">
+                    {canManageFinance && <span className="text-xs text-zinc-400">
                       Хүчинтэй: <b className="text-white">{editForm.expireDate || "-"}</b>
-                    </span>
+                    </span>}
                   </div>
                 </div>
-                <button
+                {canManageFinance && <button
                   onClick={() => { setActiveTab("payments"); setShowAddPayment(true); }}
                   className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-xl transition text-xs shadow-md shadow-red-600/30 flex items-center gap-1.5"
                 >
                   <Plus size={14} /> Сунгах / Төлөх
-                </button>
+                </button>}
               </div>
 
               {/* МЭДЭЭЛЭЛ ЗАСАХ РЕЖИМ (EDIT FORM) */}
